@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {Component} from 'react';
 import { storiesOf, action } from '@kadira/storybook';
 
 import sample from 'lodash/sample';
@@ -6,10 +6,7 @@ import random from 'lodash/random';
 import moment from 'moment';
 import names from './names';
 import Scheduler from './../';
-import './legacy.less';
 import './../scheduler.less';
-
-var legacyHtml = require("raw!./LegacyScheduler.html");
 
 const dates = [
     '06',
@@ -60,17 +57,80 @@ const generateResources = (size) => {
     return resources;
 }
 
+class WeekView extends Component {
+    constructor(props) {
+        super(props);
+
+        this.handleShowResourcesChange = this.handleShowResourcesChange.bind(this);
+        this.handleResourcesSizeChange = this.handleResourcesSizeChange.bind(this);
+        this.generateResources = this.generateResources.bind(this);
+        this.handleClearResources = this.handleClearResources.bind(this);
+        this.handleToggleLoading = this.handleToggleLoading.bind(this);
+
+        this.state = {
+            showResourcesColumn: true,
+            resourcesSize: 6,
+            resources: generateResources(6),
+            isLoading: false
+        }
+    }
+    handleResourcesSizeChange(e) {
+        this.setState({
+            resourcesSize: parseInt(e.target.value)
+        })
+    }
+    handleShowResourcesChange(e) {
+        this.setState({
+            showResourcesColumn: !this.state.showResourcesColumn
+        })
+    }
+    generateResources() {
+        this.setState({
+            resources: generateResources(this.state.resourcesSize)
+        })
+    }
+    handleClearResources() {
+        this.setState({
+            resources: []
+        })
+    }
+    handleToggleLoading() {
+        this.setState({
+            isLoading: !this.state.isLoading
+        })
+    }
+    render() {
+        return (
+            <div>
+                <div>
+                    <form>
+                        <div>
+                            <input type="text" value={this.state.resourcesSize} onChange={this.handleResourcesSizeChange} />
+                            <button type="button" onClick={this.generateResources}>Generate resources!</button>
+                            <a href="javascript:void(0)" onClick={this.handleClearResources}>Clear resources</a>
+                        </div>
+                        <input type="checkbox" checked={this.state.showResourcesColumn} onChange={this.handleShowResourcesChange} /> Show resources column
+                        <br />
+                        <input type="checkbox" checked={this.state.isLoading} onChange={this.handleToggleLoading} /> Toggle loading state
+                    </form>
+                </div>
+                <div style={{
+                    height: 250
+                }}>
+                    <Scheduler
+                        resources={this.state.resources}
+                        showResourcesColumn={this.state.showResourcesColumn}
+                        startOfWeek={0}
+                        isLoading={this.state.isLoading}
+                        date={new Date(2016, 10, 6)}
+                        />
+                </div>
+            </div>
+        )
+    }
+}
+
 storiesOf('Scheduler', module)
-    .add('with text', () => (
-        <div style={{
-            height: 250
-        }}>
-            <Scheduler
-                resources={generateResources(2)}
-                startOfWeek={0}
-                />
-        </div>
-    ))
-    .add('legacy', () => (
-        <div dangerouslySetInnerHTML={{ __html: legacyHtml }}></div>
+    .add('Week view', () => (
+        <WeekView />
     ))

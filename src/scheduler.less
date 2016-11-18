@@ -3,6 +3,9 @@
   @header-height: 40px;
   @border-color: #DDD;
   @scroll-width: 17px;
+  @default-resource-col-width: 16%;
+  @default-date-col-width: (100% - @default-resource-col-width) / 7;
+  @min-row-height: 40px;
 
   .table-display() {
     display: table;
@@ -22,6 +25,7 @@
   width: 100%;
   border: 1px solid @border-color;
 
+
   /* Header section
   **********************/
 
@@ -31,8 +35,6 @@
     height: @header-height;
     line-height: @header-height;
     padding-right: @scroll-width;
-
-    //width: calc(~"100% - @{scroll-width}");
 
     background-image: -webkit-gradient(linear, left top, left bottom, from(#f8f8f8), to(#ececec));
     background-image: -webkit-linear-gradient(top, #f8f8f8, #ececec);
@@ -74,13 +76,25 @@
       border-left-width: 0;
     }
   }
+
+  &.hs-scheduler--week {
+
+    .hs-scheduler__body__row {
+      min-height: @min-row-height;
+    }
+
+
+    .hs-scheduler__header__title,
+    .hs-scheduler__body__row__title,
+    .hs-scheduler__footer__title {
+      width: @default-resource-col-width;
+    }
+
+    .hs-scheduler__header__date,
+    .hs-scheduler__body__row__date,
+    .hs-scheduler__footer__date {
+      width: @default-date-col-width;
+    }
+  }
 }
 
-//.hs-scheduler__header__title {}
-//.hs-scheduler__header__date {}
-//.hs-scheduler__body {}
-//.hs-scheduler__body__row__title {}
-//.hs-scheduler__body__row__date {}
-//.hs-scheduler__footer {}
-//.hs-scheduler__footer__title {}
-//.hs-scheduler__footer__date {}

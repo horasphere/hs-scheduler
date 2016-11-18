@@ -14,8 +14,7 @@ const {
 export const assignmentShape = shape({
     id: oneOfType([string, number]).isRequired,
     start: instanceOf(Date).isRequired,
-    end: instanceOf(Date).isRequired,
-    resourceId: oneOfType([string, number]).isRequired
+    end: instanceOf(Date).isRequired
 })
 
 export const resourceShape = shape({
@@ -26,5 +25,6 @@ export const resourceShape = shape({
 
 export const weekComponentsShape = shape({
     headerTitle: elementType.isRequired,
-    headerWeekday: elementType.isRequired
+    headerWeekday: elementType.isRequired,
+    assignment: elementType.isRequired
 })

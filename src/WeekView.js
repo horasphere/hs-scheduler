@@ -3,9 +3,11 @@ import moment from 'moment';
 
 import {resourceShape} from './propTypes';
 import {weekComponentsShape} from './propTypes';
-import {localDateFormat} from './utils/date';
+import {LOCAL_DATE_FORMAT} from './utils/date';
 import {indexResources, getAssignmentsByResourceAndDate} from './utils/resourceHelper';
-import Quart from './Quart';
+import SchedulerBody from './SchedulerBody';
+import WeekBodyRow from './WeekBodyRow';
+
 const NB_OF_DAYS = 7;
 
 const propTypes = {
@@ -13,6 +15,10 @@ const propTypes = {
     resources: PropTypes.arrayOf(resourceShape).isRequired,
     weekdayFormat: PropTypes.string.isRequired,
     startOfWeek: PropTypes.oneOf([0, 1, 2, 3, 5, 6]).isRequired,
+    showResourcesColumn: PropTypes.bool.isRequired,
+    isLoading: PropTypes.bool.isRequired,
+    loading: PropTypes.element.isRequired,
+    empty: PropTypes.element.isRequired,
     components: weekComponentsShape
 }
 
@@ -23,9 +29,9 @@ class Week extends Component {
     get start() {
         const {date, startOfWeek} = this.props;
 
-        const start = moment(date).day(startOfWeek).format(localDateFormat);
+        const start = moment(date).day(startOfWeek).format(LOCAL_DATE_FORMAT);
 
-        if(moment(start).isAfter(moment(date).format(localDateFormat))) {
+        if(moment(start).isAfter(moment(date).format(LOCAL_DATE_FORMAT))) {
             return moment(start).add(-1 * NB_OF_DAYS, 'days');
         }
 
@@ -42,14 +48,18 @@ class Week extends Component {
         return dates;
     }
     renderHeader(dates) {
+        const showResourcesColumn = this.props.showResourcesColumn;
         const HeaderTitle = this.props.components.headerTitle;
         const HeaderWeekday = this.props.components.headerWeekday;
 
         return (
             <div className="hs-scheduler__header">
-                    <div className="hs-scheduler__header__title">
-                        <HeaderTitle />
-                    </div>
+                    {(showResourcesColumn)
+                        ? <div className="hs-scheduler__header__title">
+                            <HeaderTitle />
+                            </div>
+                        : null
+                    }
                     {dates.map((date) => {
                         const key = moment(date).format('D-M-YY');
                         return <div className="hs-scheduler__header__date" key={key}>
@@ -62,39 +72,65 @@ class Week extends Component {
             </div>
         )
     }
-    renderWeekday(resourceId, date, indexedResources) {
-        const assignments = getAssignmentsByResourceAndDate(resourceId, date, indexedResources);
+    renderBodyRows(dates, indexedResources) {
+        const {showResourcesColumn}= this.props;
+        const Assignment = this.props.components.assignment;
 
         return (
-            <div className="hs-scheduler__body__row__date">
-                {assignments.map((assignment) => {
-                    return <Quart />
+            <div className="hs-scheduler__body">
+                {this.props.resources.map((resource) => {
+                    return <WeekBodyRow
+                            key={resource.id}
+                            dates={dates}
+                            resource={resource}
+                            indexedResources={indexedResources}
+                            showResourcesColumn={showResourcesColumn}
+                            assignmentComponent={Assignment}
+                        />
                 })}
             </div>
         )
+
+    }
+    renderLoading() {
+        const {loading} = this.props;
+
+        return (
+            <div className="hs-scheduler__body">
+                {loading}
+            </div>
+        )
+    }
+    renderEmpty() {
+        const {empty} = this.props;
+
+        return (
+            <div className="hs-scheduler__body">
+                {empty}
+            </div>
+        )
+    }
+    renderBody(dates, indexedResources) {
+        const {isLoading, resources} = this.props;
+        const isEmpty = (resources.length === 0);
+
+        if(isLoading) {
+            return this.renderLoading();
+        }
+        if(isEmpty) {
+            return this.renderEmpty();
+        }
+
+        return this.renderBodyRows(dates, indexedResources);
     }
     render() {
         const dates = this.dates;
         const indexedResources = indexResources(this.props.resources);
 
-        console.log(indexedResources);
         return (
-            <div className="hs-scheduler">
+            <div className="hs-scheduler hs-scheduler--week">
                 {this.renderHeader(dates)}
-                <div className="hs-scheduler__body">
-                    {this.props.resources.map((resource) => {
-                        const {id, name} = resource;
-
-                        return (
-                            <div className="hs-scheduler__body__row" key={id}>
-                                <div className="hs-scheduler__body__row__title">{name}</div>
-                                {this.dates.map((date) => {
-                                    return this.renderWeekday(id, date, indexedResources);
-                                }, this)}
-                            </div>
-                        )
-                    }, this)}
-                </div>
+                {this.renderBody(dates, indexedResources)}
             </div>
         )
     }
