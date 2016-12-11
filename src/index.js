@@ -1,3 +1,3 @@
-import Scheduler from './Scheduler'
+import Scheduler from './Grid'
 
 export default Scheduler;
