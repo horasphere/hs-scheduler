@@ -7,7 +7,7 @@
     "start": "webpack-dev-server --progress --inline --hot",
     "storybook": "start-storybook -p 9001 -c .storybook",
     "build-storybook": "build-storybook",
-    "test": "babel-tape-runner src/**/*.test.js | tap-spec"
+    "test:server": "node webpack.test.server.js"
   },
   "author": "Maxime Morin <maxime.morin2@gmail.com>",
   "license": "ISC",
