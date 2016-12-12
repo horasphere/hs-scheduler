@@ -1,5 +1,4 @@
 import test from 'tape';
-import sinon from 'sinon';
 import React from 'react';
 import { createRenderer } from 'react-addons-test-utils';
 
@@ -42,7 +41,7 @@ test('Scheduler rowRenderer()', (t) => {
 
 
 
-    t.equal(callCount, 2 * 2, 'Should be 1')
+    t.equal(callCount, 2 * RESOURCES.length, 'Should call rowRenderer twice for each resource');
 
     unmount(node);
     t.end();

@@ -86,8 +86,6 @@ class VirtualListPoc extends Component {
     }
     _cellRenderer ({ rowIndex, style, ...rest }) {
 
-        console.log('_cellRenderer')
-
         // CellMeasurer context style is undefined
         style = style || {};
         // By default, List cells should be 100% width.

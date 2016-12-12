@@ -7,7 +7,8 @@
     "start": "webpack-dev-server --progress --inline --hot",
     "storybook": "start-storybook -p 9001 -c .storybook",
     "build-storybook": "build-storybook",
-    "test:server": "node webpack.test.server.js"
+    "test:server": "node webpack.test.server.js",
+    "test:testem": "testem"
   },
   "author": "Maxime Morin <maxime.morin2@gmail.com>",
   "license": "ISC",
