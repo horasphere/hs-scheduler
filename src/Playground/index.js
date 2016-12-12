@@ -1,5 +1,5 @@
-import VirtualGridPoc from './VirtualGridPoc';
-import VirtualListPoc from './VirtualListPoc';
+import VirtualGridPoc from './VirtualGridPoc'
+import VirtualListPoc from './VirtualListPoc'
 
 export {
     VirtualListPoc,

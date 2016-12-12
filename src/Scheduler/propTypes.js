@@ -1,21 +1,19 @@
-import {PropTypes} from 'react';
+import {PropTypes} from 'react'
 
 const {
     instanceOf,
-    arrayOf,
     oneOfType,
     shape,
     string,
-    number,
-    component
-} = PropTypes;
+    number
+} = PropTypes
 
 export const eventShape = shape({
-    id: oneOfType([string, number]).isRequired,
-    start: instanceOf(Date).isRequired,
-    end: instanceOf(Date).isRequired
+  id: oneOfType([string, number]).isRequired,
+  start: instanceOf(Date).isRequired,
+  end: instanceOf(Date).isRequired
 })
 
 export const resourceShape = shape({
-    id: oneOfType([string, number]).isRequired
+  id: oneOfType([string, number]).isRequired
 })
