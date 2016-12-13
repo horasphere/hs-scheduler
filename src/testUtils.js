@@ -1,18 +1,26 @@
-import ReactDOM from 'react-dom'
+import ReactDOM, { findDOMNode } from 'react-dom'
 
-export function mount (markup) {
-  const div = document.createElement('div')
+export function mount (markup, node = null) {
+  if(node !== null) {
+    unmount(node);
+  }
 
-    // Unless we attach the mount-node to body, getBoundingClientRect() won't work
-  document.body.appendChild(div)
+  node = document.createElement('div')
+
+  // Unless we attach the mount-node to body, getBoundingClientRect() won't work
+  document.body.appendChild(node)
+
+  const component = ReactDOM.render(markup, node);
 
   return {
-    component: ReactDOM.render(markup, div),
-    node: div
+    component,
+    componentNode: findDOMNode(component),
+    node
   }
 }
 
 export function unmount (node) {
   ReactDOM.unmountComponentAtNode(node)
+  document.body.removeChild(node)
 }
 
