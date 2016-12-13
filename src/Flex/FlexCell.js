@@ -1,35 +1,35 @@
-import React, {Component, PropTypes} from 'react';
+import React, {Component, PropTypes} from 'react'
 
 const propTypes = {
-    width: PropTypes.number.isRequired,
-    style: PropTypes.object,
-    className: PropTypes.string
+  width: PropTypes.number.isRequired,
+  style: PropTypes.object,
+  className: PropTypes.string
 }
 
 const defaultProps = {
-    style: {},
-    className: ''
+  style: {},
+  className: ''
 }
 
 class FlexCell extends Component {
-    render() {
-        const { width, style, className, children } = this.props;
+  render () {
+    const { width, style, className, children } = this.props
 
-        const cellStyle = {
-            boxSizing: 'border-box',
-            flex: `1 1 ${width}%`,
-            ...style
-        }
-
-        return (
-            <div className={className} style={cellStyle}>
-                { children }
-            </div>
-        )
+    const cellStyle = {
+      boxSizing: 'border-box',
+      flex: `1 1 ${width}%`,
+      ...style
     }
+
+    return (
+      <div className={className} style={cellStyle}>
+        { children }
+      </div>
+    )
+  }
 }
 
-FlexCell.propTypes = propTypes;
-FlexCell.defaultProps = defaultProps;
+FlexCell.propTypes = propTypes
+FlexCell.defaultProps = defaultProps
 
-export default FlexCell;
+export default FlexCell
