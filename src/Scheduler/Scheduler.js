@@ -3,6 +3,7 @@ import { Grid as VirtualizedGrid, CellMeasurer } from 'react-virtualized'
 import keyBy from 'lodash/keyBy'
 import cn from 'classnames'
 
+import { FlexRow, FlexCell } from './../Flex'
 import generateCellRenderer from './generateCellRenderer'
 import { eventShape, resourceShape } from './propTypes'
 
@@ -16,15 +17,19 @@ const propTypes = {
   resources: PropTypes.arrayOf(resourceShape).isRequired,
   noResourcesRenderer: PropTypes.func.isRequired,
   events: PropTypes.arrayOf(eventShape).isRequired,
-  rowRenderer: PropTypes.func.isRequired,
+  rowResourceRenderer: PropTypes.func.isRequired,
+  rowContentRenderer: PropTypes.func.isRequired,
   className: PropTypes.string.isRequired,
   headerHeight: PropTypes.number.isRequired,
-  headerRenderer: PropTypes.func.isRequired,
+  headerResourceRenderer: PropTypes.func.isRequired,
+  headerContentRenderer: PropTypes.func.isRequired,
   headerClassName: PropTypes.string.isRequired,
   footerVisible: PropTypes.bool.isRequired,
   footerHeight: PropTypes.number.isRequired,
-  footerRenderer: PropTypes.func.isRequired,
-  footerClassName: PropTypes.string.isRequired
+  footerResourceRenderer: PropTypes.func.isRequired,
+  footerContentRenderer: PropTypes.func.isRequired,
+  footerClassName: PropTypes.string.isRequired,
+  resourceColumnWidth: PropTypes.number.isRequired // width %
 }
 
 const defaultProps = {
@@ -33,38 +38,48 @@ const defaultProps = {
   noResourcesRenderer: () => null,
   className: '',
   headerHeight: 0,
-  headerRenderer: () => null,
   headerClassName: '',
+  headerResourceRenderer: () => (null),
+  headerContentRenderer: () => (null),
   footerVisible: true,
   footerHeight: 0,
-  footerRenderer: () => null,
-  footerClassName: ''
+  footerResourceRenderer: () => null,
+  footerContentRenderer: () => null,
+  footerClassName: '',
+  resourceColumnWidth: 12
 }
 
 class Scheduler extends Component {
+  constructor(props) {
+    super(props)
+
+    this.rowRenderer = this.rowRenderer.bind(this);
+  }
   render () {
     const {
-        resources,
-        noResourcesRenderer,
-        events,
-        rowRenderer,
-        className,
-        headerClassName,
-        headerRenderer,
-        headerHeight,
-        footerVisible,
-        footerClassName,
-        footerRenderer,
-        footerHeight,
-        height,
-        width
+      resources,
+      noResourcesRenderer,
+      events,
+      className,
+      headerClassName,
+      headerResourceRenderer,
+      headerContentRenderer,
+      headerHeight,
+      footerVisible,
+      footerClassName,
+      footerResourceRenderer,
+      footerContentRenderer,
+      footerHeight,
+      height,
+      width,
+      resourceColumnWidth
     } = this.props
 
     const cellRenderer = generateCellRenderer({
       resources,
       resourceById: keyBy(resources, 'id'),
       eventById: keyBy(events, 'id'),
-      rowRenderer
+      rowRenderer: this.rowRenderer
     })
 
     let bodyHeight = height - headerHeight
@@ -74,9 +89,14 @@ class Scheduler extends Component {
 
     return (
     <div className={cn('hs-scheduler', className)}>
-        <div style={{height: headerHeight}} className={cn('hs-scheduler__header', headerClassName)}>
-          { headerRenderer() }
-        </div>
+        <FlexRow style={{height: headerHeight}} className={cn('hs-scheduler__header', headerClassName)}>
+          <FlexCell width={resourceColumnWidth}>
+            { headerResourceRenderer() }
+          </FlexCell>
+          <FlexCell width={100 - resourceColumnWidth}>
+            { headerContentRenderer() }
+          </FlexCell>
+        </FlexRow>
         <CellMeasurer
         cellRenderer={cellRenderer}
         columnCount={COLUMN_COUNT}
@@ -101,13 +121,42 @@ class Scheduler extends Component {
       </CellMeasurer>
       {
         (footerVisible)
-            ? <div style={{height: footerHeight}} className={cn('hs-scheduler__footer', footerClassName)}>
-                { footerRenderer() }
-              </div>
+            ? <FlexRow style={{height: footerHeight}} className={cn('hs-scheduler__footer', footerClassName)}>
+                <FlexCell width={resourceColumnWidth} >
+                  { footerResourceRenderer() }
+                </FlexCell>
+                <FlexCell width={100 - resourceColumnWidth}>
+                  { footerContentRenderer() }
+                </FlexCell>
+              </FlexRow>
             : null
       }
 
     </div>
+    )
+  }
+  rowRenderer({
+    index,
+    style,
+    resource,
+    resourceById,
+    eventById,
+    isScrolling,
+    isVisible,
+    key
+    }) {
+
+    const { rowResourceRenderer, rowContentRenderer, resourceColumnWidth } = this.props
+
+    return (
+      <FlexRow key={key} style={style}>
+        <FlexCell width={resourceColumnWidth}>
+          { rowResourceRenderer() }
+        </FlexCell>
+        <FlexCell width={100 - resourceColumnWidth}>
+          { rowContentRenderer() }
+        </FlexCell>
+      </FlexRow>
     )
   }
 }
