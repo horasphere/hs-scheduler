@@ -11,64 +11,24 @@ function getScheduler (props = {}) {
       events={[]}
       width={300}
       height={300}
+      headerResourceRenderer={() => (null)}
+      headerContentRenderer={() => (null)}
       rowResourceRenderer={() => (null)}
       rowContentRenderer={() => (null)}
+      footerResourceRenderer={() => (null)}
+      footerContentRenderer={() => (null)}
       {...props}
       />
   )
 }
 
-// test('Scheduler rowRenderer()', (t) => {
-//  const resources = [{id: 'r1'}]
-//  const events = [{id: 'e1', start: new Date(), end: new Date()}]
-//
-//  let callCount = 0
-//  let options
-//  const rowRenderer = function (_options) {
-//    callCount++
-//    options = _options
-//
-//    return <div key={_options.key}/>
-//  }
-//
-//  const { node } = mount(getScheduler({
-//    resources: resources,
-//    events: events,
-//    rowRenderer: rowRenderer
-//  }))
-//
-//  t.equal(callCount, 2 * resources.length, 'should call :rowRenderer twice for each resource')
-//
-//  const {
-//    style,
-//    index,
-//    resource,
-//    resourceById,
-//    eventById,
-//    isScrolling,
-//    isVisible,
-//    key
-//    } = options
-//
-//  t.ok(style, ':style params should be defined')
-//  t.equal(0, index, ':index should be defined')
-//  t.equal(resources[0], resource, ':resource should be defined')
-//  t.deepEqual({r1: resources[0]}, resourceById, ':resourceById should be defined')
-//  t.deepEqual({e1: events[0]}, eventById, ':eventById should be defined')
-//  t.equal(false, isScrolling, ':isScrolling should be defined')
-//  t.equal(true, isVisible, ':isVisible should be defined')
-//  t.equal('0-0', key, ':key should be defined')
-//
-//  unmount(node)
-//  t.end()
-// })
-
 test('Scheduler rowRenderer()', (t) => {
   const resources = [{id: 'r1'}]
-  const events = [{id: 'e1', start: new Date(), end: new Date()}]
+  const events = [{id: 'e1', resourceId: 'r1', start: new Date(), end: new Date()}]
 
   let rowResourceRendererCalled = false
   let rowContentRendererCalled = false
+  let options
   const { node, componentNode } = mount(getScheduler({
     resources: resources,
     events: events,
@@ -77,8 +37,9 @@ test('Scheduler rowRenderer()', (t) => {
       rowResourceRendererCalled = true
       return null
     },
-    rowContentRenderer: function () {
+    rowContentRenderer: function (_options) {
       rowContentRendererCalled = true
+      options = _options
       return null
     }
   }))
@@ -86,6 +47,10 @@ test('Scheduler rowRenderer()', (t) => {
   t.ok(componentNode.querySelectorAll('.hs-scheduler__row')[0].className.indexOf('foo') > -1, 'should use :rowClassName if specified')
   t.ok(rowResourceRendererCalled, 'should call :rowResourceRenderer if specified')
   t.ok(rowContentRendererCalled, 'should call :rowContentRenderer if specified')
+
+  t.equal(options.resource.id, 'r1', ':isScrolling param should be defined')
+  t.equal(options.isScrolling, false, ':isScrolling param should be defined')
+  t.equal(options.isVisible, true, ':isVisible param should be defined')
 
   unmount(node)
   t.end()

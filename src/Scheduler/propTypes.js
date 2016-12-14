@@ -9,7 +9,8 @@ const {
 } = PropTypes
 
 export const eventShape = shape({
-  id: oneOfType([string, number]).isRequired,
+  id: PropTypes.string.isRequired,
+  resourceId: PropTypes.string.isRequired,
   start: instanceOf(Date).isRequired,
   end: instanceOf(Date).isRequired
 })

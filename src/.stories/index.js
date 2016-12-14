@@ -3,3 +3,4 @@ import './VirtualPoc.story';
 import './VirtualListPoc.story';
 import './Scheduler.story';
 import './FlexGrid.story';
+import './WeekScheduler.story';

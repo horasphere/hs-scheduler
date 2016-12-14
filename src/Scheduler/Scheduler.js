@@ -2,6 +2,7 @@ import React, { Component, PropTypes } from 'react'
 import { Grid as VirtualizedGrid, CellMeasurer } from 'react-virtualized'
 import keyBy from 'lodash/keyBy'
 import cn from 'classnames'
+import shallowCompare from 'react-addons-shallow-compare'
 
 import { FlexRow, FlexCell } from './../Flex'
 import generateCellRenderer from './generateCellRenderer'
@@ -12,8 +13,6 @@ const COLUMN_COUNT = 1
 const propTypes = {
   height: PropTypes.number.isRequired,
   width: PropTypes.number.isRequired,
-  date: PropTypes.instanceOf(Date).isRequired,
-  startOfWeek: PropTypes.oneOf([0, 1, 2, 3, 5, 6]).isRequired, // Sunday to Saturday
   resources: PropTypes.arrayOf(resourceShape).isRequired,
   noResourcesRenderer: PropTypes.func.isRequired,
   events: PropTypes.arrayOf(eventShape).isRequired,
@@ -35,19 +34,13 @@ const propTypes = {
 }
 
 const defaultProps = {
-  date: new Date(),
-  startOfWeek: 0, // Sunday,
   noResourcesRenderer: () => null,
   className: '',
   headerHeight: 0,
   headerClassName: '',
-  headerResourceRenderer: () => (null),
-  headerContentRenderer: () => (null),
   rowClassName: '',
   footerVisible: true,
   footerHeight: 0,
-  footerResourceRenderer: () => null,
-  footerContentRenderer: () => null,
   footerClassName: '',
   resourceColumnWidth: 12,
   resourceColumnVisible: true
@@ -59,7 +52,12 @@ class Scheduler extends Component {
 
     this.rowRenderer = this.rowRenderer.bind(this)
   }
+  shouldComponentUpdate (nextProps, nextState) {
+    return shallowCompare(this, nextProps, nextState)
+  }
   render () {
+    console.log('Scheduler[render]')
+    const props = this.props;
     const {
       resources,
       noResourcesRenderer,
@@ -70,7 +68,8 @@ class Scheduler extends Component {
       footerHeight,
       height,
       width
-    } = this.props
+    } = props
+
 
     const cellRenderer = generateCellRenderer({
       resources,
@@ -86,7 +85,7 @@ class Scheduler extends Component {
 
     return (
       <div className={cn('hs-scheduler', className)}>
-        { this.getRenderedHeader() }
+
         <CellMeasurer
           cellRenderer={cellRenderer}
           columnCount={COLUMN_COUNT}
@@ -95,13 +94,15 @@ class Scheduler extends Component {
         >
           {({ getRowHeight }) => (
             <VirtualizedGrid
+              {...props}
               autoContainerWidth
+              estimatedRowSize={75}
               width={width}
               height={bodyHeight}
               columnCount={COLUMN_COUNT}
               columnWidth={width}
               overscanColumnCount={0}
-              overscanRowCount={0}
+              overscanRowCount={20}
               rowHeight={getRowHeight}
               rowCount={resources.length}
               cellRenderer={cellRenderer}
@@ -199,7 +200,7 @@ class Scheduler extends Component {
           : null
         }
         <FlexCell width={this.contentColumnWidth}>
-          { rowContentRenderer() }
+          { rowContentRenderer({resource, isScrolling, isVisible}) }
         </FlexCell>
       </FlexRow>
     )

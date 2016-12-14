@@ -1,6 +1,7 @@
 
 export default function ({ resources, resourceById, eventById, rowRenderer }) {
   return function cellRenderer ({ rowIndex, style, isScrolling, isVisible, key }) {
+
     // CellMeasurer context style is undefined
     style = style || {}
 
