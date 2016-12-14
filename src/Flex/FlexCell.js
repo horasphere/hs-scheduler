@@ -16,8 +16,8 @@ class FlexCell extends Component {
     const { width, style, className, children } = this.props
 
     const cellStyle = {
-      boxSizing: 'border-box',
-      flex: `1 1 ${width}%`,
+      display: 'table-cell',
+      width: `${width}%`,
       ...style
     }
 

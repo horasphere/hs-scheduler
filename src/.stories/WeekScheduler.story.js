@@ -3,79 +3,119 @@ import { storiesOf, action } from '@kadira/storybook';
 import 'react-virtualized/styles.css';
 import random from 'lodash/random';
 import sample from 'lodash/sample';
+import keyBy from 'lodash/keyBy'
 import moment from 'moment';
 
 import { WeekScheduler } from './../WeekScheduler'
 import { listDates, LOCAL_DATE_FORMAT } from './../utils/date'
+import { randomEvent, generateResources, generateEvents } from './helpers'
 
 import './../WeekScheduler/weekscheduler.less'
 
-const MAX_EVENTS = 15;
+const NB_RESOURCES = 300;
 
-function randomRange(dates) {
-  const localDate = moment(sample(dates)).format(LOCAL_DATE_FORMAT);
+class Wrapper extends Component {
+  constructor(props) {
+    super(props);
 
-  const start = moment(`${localDate}T00:00:00`).add(random(0, 1400), 'minutes').toDate();
-  const end = moment(start).add(random(0, 1400), 'minutes').toDate();
+    const dates = listDates(new Date(), 7)
+    const resources = generateResources(NB_RESOURCES)
 
-  return {
-    start,
-    end
-  }
-}
-
-function generateResource(size) {
-  const resources = [];
-
-  for(var i=0; i < size; i++) {
-    resources.push({id: `resource_${i}`})
-  }
-
-  return resources;
-}
-
-function generateEvents(resources, dates) {
-  let id = 0;
-  const events = [];
-
-  resources.forEach((resource) => {
-    const nbEvents = random(1, MAX_EVENTS)
-
-
-    for(var i=0; i < nbEvents; i++) {
-      const { start, end } = randomRange(dates)
-      events.push({
-          id: `event_${id}`,
-          resourceId: resource.id,
-          start,
-          end
-      })
-
-      id++;
+    this.state = {
+      scrollToResource: undefined,
+      dates,
+      resources,
+      events: generateEvents(resources, dates)
     }
-  })
 
+    this.handleAdd = this.handleAdd.bind(this);
+    this.handleRemove = this.handleRemove.bind(this);
+    this.handleScrollTo = this.handleScrollTo.bind(this);
+    this.handleScrollToRandom = this.handleScrollToRandom.bind(this);
+  }
+  handleAdd() {
+      const resourceId = this.resourceInput.value
+      const localDate = this.dateInput.value
 
-  return events;
+      this.setState({
+        events: [
+          ...this.state.events,
+          randomEvent(resourceId, moment(localDate).toDate())
+        ]
+      })
+  }
+  handleRemove() {
+    const resourceId = this.resourceInput.value
+    const localDate = this.dateInput.value
+    const {events} = this.state;
+
+    const filtered = events.filter((event) => {
+        return event.resourceId === resourceId && moment(event.start).format(LOCAL_DATE_FORMAT) === localDate;
+    })
+
+    const index = events.indexOf(filtered[filtered.length - 1])
+    if(index > -1) {
+      events.splice(index, 1)
+      this.setState({
+        events: [...events]
+      })
+    }
+
+  }
+  handleScrollTo() {
+    const resourceId = this.resourceInput.value
+
+    this.setState({
+      scrollToResource: resourceId
+    })
+  }
+  handleScrollToRandom() {
+    this.setState({
+      scrollToResource: sample(this.state.resources).id
+    })
+  }
+  render() {
+
+      const {dates, resources, events, scrollToResource} = this.state;
+
+      return <div>
+          <div>
+            <select defaultValue={resources[0].id} ref={(input) => this.resourceInput = input}>
+              {
+                resources.map((resource) => {
+                  return <option key={resource.id} value={resource.id}>{resource.id}</option>
+                })
+              }
+            </select>
+            <select defaultValue={moment(dates[0]).format(LOCAL_DATE_FORMAT)} ref={(input) => this.dateInput = input}>
+              {
+                dates.map((date) => {
+                  const localDate = moment(date).format(LOCAL_DATE_FORMAT)
+                  return <option key={localDate} value={localDate}>{localDate}</option>
+                })
+              }
+            </select>
+            <button onClick={this.handleAdd}>Add</button>
+            <button onClick={this.handleRemove}>Remove</button>
+            <button onClick={this.handleScrollTo}>Scroll to</button>
+            <button onClick={this.handleScrollToRandom}>Scroll to random</button>
+          </div>
+          <div>
+            <WeekScheduler
+              dates={dates}
+              resources={resources}
+              events={events}
+              width={800}
+              height={400}
+              scrollToResource={scrollToResource}
+              />
+            </div>
+        </div>
+    }
 }
-
-const dates = listDates(new Date(), 7);
-const resources = generateResource(100);
-const events = generateEvents(resources, dates)
 
 storiesOf('WeekScheduler', module)
   .add('Basic WeekScheduler with resource column', () => {
 
-
-    //console.log('dates', dates)
-    //console.log('resources', resources)
-    //console.log('events', events)
-
-    return <WeekScheduler
-      dates={dates}
-      resources={resources}
-      events={events}
-      width={800}
-      height={600}
-      />
+    return <Wrapper></Wrapper>
   })

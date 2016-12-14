@@ -27,7 +27,7 @@ class FlexRow extends Component {
     const rowStyle = {
       boxSizing: 'border-box',
       display: 'flex',
-      flex: '0 1 auto',
+      flex: '1 1 auto',
       flexDirection: 'row',
       flexWrap: 'wrap',
       ...style

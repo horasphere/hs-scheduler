@@ -30,11 +30,14 @@ const propTypes = {
   footerContentRenderer: PropTypes.func.isRequired,
   footerClassName: PropTypes.string.isRequired,
   resourceColumnWidth: PropTypes.number.isRequired, // width in %
-  resourceColumnVisible: PropTypes.bool.isRequired
+  resourceColumnVisible: PropTypes.bool.isRequired, // TODO could rename to resourceVisible
+  scrollToResource: PropTypes.string
+
 }
 
 const defaultProps = {
   noResourcesRenderer: () => null,
+  scrollToResource: undefined,
   className: '',
   headerHeight: 0,
   headerClassName: '',
@@ -67,16 +70,20 @@ class Scheduler extends Component {
       footerVisible,
       footerHeight,
       height,
-      width
+      width,
+      scrollToResource
     } = props
 
+    const resourceById = keyBy(resources, 'id')
 
     const cellRenderer = generateCellRenderer({
       resources,
-      resourceById: keyBy(resources, 'id'),
+      resourceById: resourceById,
       eventById: keyBy(events, 'id'),
       rowRenderer: this.rowRenderer
     })
+
+    const scrollToRow = (scrollToResource && resourceById[scrollToResource]) ? resources.indexOf(resourceById[scrollToResource]) : undefined;
 
     let bodyHeight = height - headerHeight
     if (footerVisible) {
@@ -95,7 +102,7 @@ class Scheduler extends Component {
           {({ getRowHeight }) => (
             <VirtualizedGrid
               {...props}
-              autoContainerWidth
+              autoContainerWidth={false}
               estimatedRowSize={75}
               width={width}
               height={bodyHeight}
@@ -106,6 +113,8 @@ class Scheduler extends Component {
               rowHeight={getRowHeight}
               rowCount={resources.length}
               cellRenderer={cellRenderer}
+              scrollToAlignment="start"
+              scrollToRow={scrollToRow}
               noContentRenderer={noResourcesRenderer}
             />
         )}
@@ -195,7 +204,7 @@ class Scheduler extends Component {
       <FlexRow key={key} style={style} className={cn('hs-scheduler__row', rowClassName)}>
         {(resourceColumnVisible)
           ? <FlexCell width={resourceColumnWidth}>
-            { rowResourceRenderer() }
+            { rowResourceRenderer({resource}) }
           </FlexCell>
           : null
         }

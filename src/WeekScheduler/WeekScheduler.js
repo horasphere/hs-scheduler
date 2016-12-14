@@ -14,12 +14,14 @@ const propTypes = {
   dates: PropTypes.arrayOf(PropTypes.instanceOf(Date)).isRequired,
   resources: PropTypes.arrayOf(resourceShape).isRequired,
   events: PropTypes.arrayOf(eventShape).isRequired,
-  headerDateRenderer: PropTypes.func.isRequired
+  headerDateRenderer: PropTypes.func.isRequired,
+  scrollToResource: PropTypes.string
 }
 
 const defaultProps = {
   headerDateRenderer: defaultHeaderDateRenderer,
-  rowDateRenderer: defaultRowDateRenderer
+  rowDateRenderer: defaultRowDateRenderer,
+  scrollToResource: undefined
 }
 
 class WeekScheduler extends Component {
@@ -38,7 +40,8 @@ class WeekScheduler extends Component {
       width,
       height,
       events,
-      resources
+      resources,
+      scrollToResource
       } = this.props;
 
     // TODO remove
@@ -55,6 +58,7 @@ class WeekScheduler extends Component {
 
     return (
       <Scheduler
+        autoContainerWidth
         width={width}
         height={height}
         resources={resources}
@@ -62,10 +66,11 @@ class WeekScheduler extends Component {
         className="hs-scheduler--week"
         headerResourceRenderer={() => (<div />)}
         headerContentRenderer={this.headerContentRenderer}
-        rowResourceRenderer={() => (<div />)}
+        rowResourceRenderer={({resource}) => (<div>{resource.id}</div>)}
         rowContentRenderer={this.rowContentRenderer}
         footerResourceRenderer={() => (<div />)}
         footerContentRenderer={() => (<div />)}
+        scrollToResource={scrollToResource}
         />
     )
   }
