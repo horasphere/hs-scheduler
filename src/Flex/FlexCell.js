@@ -1,4 +1,5 @@
 import React, {Component, PropTypes} from 'react'
+import { DropTarget } from 'react-dnd';
 
 const propTypes = {
   width: PropTypes.number.isRequired,
@@ -13,7 +14,7 @@ const defaultProps = {
 
 class FlexCell extends Component {
   render () {
-    const { width, style, className, children } = this.props
+    const { width, style, className, children, connectDropTarget, isOver, dropZone } = this.props
 
         const cellStyle = {
             boxSizing: 'border-box',
@@ -23,9 +24,9 @@ class FlexCell extends Component {
         }
 
     return (
-      <div className={className} style={cellStyle}>
+      connectDropTarget(<div className={className} style={{...cellStyle, backgroundColor: (isOver && dropZone) ? 'blue': 'transparent'}}>
         { children }
-      </div>
+      </div>)
     )
   }
 }
@@ -33,4 +34,9 @@ class FlexCell extends Component {
 FlexCell.propTypes = propTypes
 FlexCell.defaultProps = defaultProps
 
-export default FlexCell
+
+export default DropTarget(() => ('quart'), {}, (connect, monitor) => ({
+  connectDropTarget: connect.dropTarget(),
+  isOver: monitor.isOver(),
+  canDrop: monitor.canDrop()
+}))(FlexCell)

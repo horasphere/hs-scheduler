@@ -107,11 +107,11 @@ class WeekScheduler extends Component {
 
     const {
       rowDateRenderer,
-      dates
+      dates,
       } = this.props;
 
     return (
-      <FlexRow>
+    <FlexRow>
         {
           dates.map((date) => {
             const localDate = moment(date).format(LOCAL_DATE_FORMAT)
@@ -124,7 +124,7 @@ class WeekScheduler extends Component {
             const filteredEvents = indexedEvents[idx] || [];
 
             return (
-              <FlexCell key={localDate} className="hs-scheduler--week__row__date" width={100 / dates.length}>
+              <FlexCell dropZone key={localDate} className="hs-scheduler--week__row__date" width={100 / dates.length}>
                 { rowDateRenderer({resource, date, isScrolling, isVisible, events: filteredEvents, searchQuery, searchMatches})  }
               </FlexCell>
             )

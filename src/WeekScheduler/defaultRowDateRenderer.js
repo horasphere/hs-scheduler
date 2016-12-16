@@ -5,7 +5,7 @@ import {Quart} from './../Quart'
 
 
 export default function({ resource, date, events, isScrolling, isVisible }) {
-  if(isScrolling ||isScrolling) {
+  if(false && isScrolling) {
     //return <div>
     //  ...
     //</div>

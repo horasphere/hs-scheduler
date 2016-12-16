@@ -1,5 +1,6 @@
 import React, { Component, PropTypes } from 'react'
 import { Grid as VirtualizedGrid, CellMeasurer } from 'react-virtualized'
+import withScrolling, { createVerticalStrength } from 'react-dnd-scrollzone'
 import keyBy from 'lodash/keyBy'
 import groupBy from 'lodash/groupBy'
 import cn from 'classnames'
@@ -14,6 +15,10 @@ import KeyBasedCellSizeCache from './keyBasedCellSizeCache'
 import { LOCAL_DATE_FORMAT } from './../utils/date'
 
 const COLUMN_COUNT = 1
+
+const ScrollZoneVirtualList = withScrolling(VirtualizedGrid);
+const vStrength = createVerticalStrength(100);
+
 
 const propTypes = {
   className: PropTypes.string.isRequired,
@@ -157,10 +162,12 @@ class Scheduler extends Component {
           }}
         >
           {({ getRowHeight }) => (
-            <VirtualizedGrid
+          <ScrollZoneVirtualList
               {...props}
               autoContainerWidth
-              scrollingResetTimeInterval={300}
+              verticalStrength={vStrength}
+              horizontalStrength={ ()=>{} }
+              scrollingResetTimeInterval={500}
               width={width}
               height={bodyHeight}
               columnCount={COLUMN_COUNT}

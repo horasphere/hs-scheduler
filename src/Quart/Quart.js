@@ -1,13 +1,16 @@
 import React, {Component} from 'react';
 import moment from 'moment';
 import {LOCAL_DATE_FORMAT} from './../utils/date';
+import { DragSource } from 'react-dnd';
 
 import './hora.less'
 
 class Quart extends Component {
   render() {
+    const {connectDragSource} = this.props;
+
     return (
-        <div className="h-quart-block">
+        connectDragSource(<div className="h-quart-block">
 
           <div className="h-quart-block-header">
             <span className="type-icon"><i className="fa fa-thumbs-up"></i></span>
@@ -65,8 +68,20 @@ class Quart extends Component {
             </div>
           </div>
 
-        </div>
+        </div>)
     )
   }
 }
-export default Quart;
+
+const boxSource = {
+  beginDrag(props) {
+    return {
+      name: 'quart-name'
+    };
+  }
+};
+
+export default DragSource(() => ('quart'), boxSource, (connect, monitor) => ({
+  connectDragSource: connect.dragSource(),
+  isDragging: monitor.isDragging()
+}))(Quart);

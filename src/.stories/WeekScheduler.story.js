@@ -6,6 +6,8 @@ import sample from 'lodash/sample';
 import keyBy from 'lodash/keyBy'
 import debounce from 'lodash/debounce'
 import moment from 'moment';
+import { DragDropContext } from 'react-dnd';
+import HTML5Backend, { NativeTypes } from 'react-dnd-html5-backend';
 
 import { WeekScheduler } from './../WeekScheduler'
 import { listDates, LOCAL_DATE_FORMAT } from './../utils/date'
@@ -13,7 +15,7 @@ import { randomEvent, generateResources, generateEvents } from './helpers'
 
 import './../WeekScheduler/weekscheduler.less'
 
-const NB_RESOURCES = 10000;
+const NB_RESOURCES = 300;
 
 class Search extends Component {
     constructor(props) {
@@ -255,10 +257,12 @@ class Wrapper extends Component {
     }
 }
 
+
 storiesOf('WeekScheduler', module)
   .add('Basic WeekScheduler with resource column', () => {
+      const App =DragDropContext(HTML5Backend)(Wrapper);
 
-    return <Wrapper></Wrapper>
+      return <App />
   })
   .add('placeholder', () => {
       return             <div style={{width: 100, height: 55}}>
