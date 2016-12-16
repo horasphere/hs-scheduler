@@ -1,13 +1,17 @@
 import React, { Component, PropTypes } from 'react'
 import { Grid as VirtualizedGrid, CellMeasurer } from 'react-virtualized'
 import keyBy from 'lodash/keyBy'
+import groupBy from 'lodash/groupBy'
 import cn from 'classnames'
 import shallowCompare from 'react-addons-shallow-compare'
+import moment from 'moment'
 
 import { FlexRow, FlexCell } from './../Flex'
 import generateCellRenderer from './generateCellRenderer'
 import { eventShape, resourceShape } from './propTypes'
 import defaultSearchMethod from './defaultSearchMethod'
+import KeyBasedCellSizeCache from './keyBasedCellSizeCache'
+import { LOCAL_DATE_FORMAT } from './../utils/date'
 
 const COLUMN_COUNT = 1
 
@@ -65,6 +69,8 @@ class Scheduler extends Component {
 
     this.rowRenderer = this.rowRenderer.bind(this)
     this.search = this.search.bind(this)
+    this.findResourceIndex = this.findResourceIndex.bind(this)
+    this.resetMeasurementForResourceId = this.resetMeasurementForResourceId.bind(this)
   }
   componentWillMount() {
     this.search(this.props)
@@ -97,6 +103,7 @@ class Scheduler extends Component {
     const { searchMatches}  = this.state;
 
     const resourceById = keyBy(resources, 'id')
+    const eventsByResourceId = groupBy(events, 'resourceId')
 
     const cellRenderer = generateCellRenderer({
       resources,
@@ -106,6 +113,7 @@ class Scheduler extends Component {
       searchMatches,
       searchQuery
     })
+
 
     const scrollToRow = (scrollToResource && resourceById[scrollToResource]) ? resources.indexOf(resourceById[scrollToResource]) : undefined;
 
@@ -122,6 +130,31 @@ class Scheduler extends Component {
           columnCount={COLUMN_COUNT}
           rowCount={resources.length}
           width={width}
+          cellSizeCache={new KeyBasedCellSizeCache({
+            buildRowKey: (index) => {
+                let max = 0;
+                const countByDate = {};
+
+                const id = resources[index].id;
+
+                eventsByResourceId[id].forEach((event) => {
+                    const localDate = moment(event.start).format(LOCAL_DATE_FORMAT)
+
+                    if(!countByDate[localDate]) {
+                      countByDate[localDate] = 0
+
+                    }
+                    countByDate[localDate]++;
+
+                    max = Math.max(max, countByDate[localDate])
+                })
+
+                return max;
+            }
+          })}
+          ref={(ref) => {
+              this._cellMeasurer = ref
+          }}
         >
           {({ getRowHeight }) => (
             <VirtualizedGrid
@@ -134,12 +167,15 @@ class Scheduler extends Component {
               columnWidth={width}
               overscanColumnCount={0}
               overscanRowCount={10}
-              rowHeight={300}
+              rowHeight={getRowHeight}
               rowCount={resources.length}
               cellRenderer={cellRenderer}
               scrollToAlignment="start"
               scrollToRow={scrollToRow}
               noContentRenderer={noResourcesRenderer}
+              ref={(ref) => {
+                  this._virtualGrid = ref;
+              }}
             />
         )}
         </CellMeasurer>
@@ -151,6 +187,26 @@ class Scheduler extends Component {
 
       </div>
     )
+  }
+  findResourceIndex(id) {
+    const resources = this.props.resources;
+
+    for(var i=0; i < resources.length; i++) {
+      if(resources[i].id === id) {
+        return i;
+      }
+    }
+
+    return -1;
+  }
+  resetMeasurementForResourceId(resourceId) {
+    const resourceIndex = this.findResourceIndex(resourceId);
+
+    if(resourceIndex > -1) {
+      this._cellMeasurer.resetMeasurementForRow(resourceIndex)
+      this._virtualGrid.recomputeGridSize({columnIndex: 0, rowIndex: resourceIndex})
+    }
+
   }
   search(props) {
     let searchMatches = [];

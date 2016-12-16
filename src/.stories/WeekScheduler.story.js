@@ -13,7 +13,7 @@ import { randomEvent, generateResources, generateEvents } from './helpers'
 
 import './../WeekScheduler/weekscheduler.less'
 
-const NB_RESOURCES = 1000;
+const NB_RESOURCES = 10000;
 
 class Search extends Component {
     constructor(props) {
@@ -106,13 +106,16 @@ class Wrapper extends Component {
   handleAdd() {
       const resourceId = this.resourceInput.value
       const localDate = this.dateInput.value
+      const eventToAdd = randomEvent(resourceId, moment(localDate).toDate());
 
       this.setState({
         events: [
           ...this.state.events,
-          randomEvent(resourceId, moment(localDate).toDate())
+          eventToAdd
         ]
       })
+
+      this._weekScheduler.resetMeasurementForResourceId(eventToAdd.resourceId)
   }
   handleRemove() {
     const resourceId = this.resourceInput.value
@@ -123,12 +126,15 @@ class Wrapper extends Component {
         return event.resourceId === resourceId && moment(event.start).format(LOCAL_DATE_FORMAT) === localDate;
     })
 
-    const index = events.indexOf(filtered[filtered.length - 1])
+    const eventToRemove = filtered[filtered.length - 1];
+    const index = events.indexOf(eventToRemove)
     if(index > -1) {
       events.splice(index, 1)
       this.setState({
         events: [...events]
       })
+
+      this._weekScheduler.resetMeasurementForResourceId(eventToRemove.resourceId)
     }
 
   }
@@ -150,7 +156,7 @@ class Wrapper extends Component {
 
       return <div>
           <div>
-            <h3>Demo {NB_RESOURCES} resources</h3>
+            <h3>Demo {NB_RESOURCES.toLocaleString('en-US', {minimumFractionDigits: 0})} resources</h3>
             <select defaultValue={resources[0].id} ref={(input) => this.resourceInput = input}>
               {
                 resources.map((resource) => {
@@ -239,6 +245,9 @@ class Wrapper extends Component {
                     scrollToResource: (matches.length) ? matches[0].id : null,
                     matches
                   })
+              }}
+              ref={(ref) => {
+                  this._weekScheduler = ref
               }}
               />
             </div>

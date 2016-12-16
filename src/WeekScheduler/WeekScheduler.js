@@ -67,12 +67,15 @@ class WeekScheduler extends Component {
         headerResourceRenderer={() => (<div />)}
         headerContentRenderer={this.headerContentRenderer}
         rowResourceRenderer={({resource, searchQuery, searchMatches}) => {
-          return <div style={{backgroundColor: searchMatches.indexOf(resource) > -1 ? 'yellow': 'transparent'}}>{resource.title}</div>
+          return <div style={{backgroundColor: searchMatches.indexOf(resource) > -1 ? 'yellow': 'transparent'}}>{resource.title}<br />{resource.id}</div>
         }}
         rowContentRenderer={this.rowContentRenderer}
         footerResourceRenderer={() => (<div />)}
         footerContentRenderer={() => (<div />)}
         scrollToResource={scrollToResource}
+        ref={(ref) => {
+            this._scheduler = ref
+        }}
         />
     )
   }
@@ -129,6 +132,9 @@ class WeekScheduler extends Component {
         }
       </FlexRow>
     )
+  }
+  resetMeasurementForResourceId(resourceId) {
+    this._scheduler.resetMeasurementForResourceId(resourceId)
   }
 }
 
