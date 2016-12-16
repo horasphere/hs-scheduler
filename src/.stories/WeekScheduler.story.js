@@ -4,6 +4,7 @@ import 'react-virtualized/styles.css';
 import random from 'lodash/random';
 import sample from 'lodash/sample';
 import keyBy from 'lodash/keyBy'
+import debounce from 'lodash/debounce'
 import moment from 'moment';
 
 import { WeekScheduler } from './../WeekScheduler'
@@ -12,7 +13,71 @@ import { randomEvent, generateResources, generateEvents } from './helpers'
 
 import './../WeekScheduler/weekscheduler.less'
 
-const NB_RESOURCES = 300;
+const NB_RESOURCES = 1000;
+
+class Search extends Component {
+    constructor(props) {
+      super(props)
+
+      this.state = {
+        searchQuery: ''
+      }
+
+      this._handleKeyPress = this._handleKeyPress.bind(this);
+    }
+    _handleKeyPress(e) {
+      const F = 70;
+      const PREVIOUS_ARROW = 37;
+      const NEXT_ARROW = 39;
+
+      if(e.keyCode === F && e.shiftKey) {
+        e.preventDefault()
+        this._input.select();
+      }
+      if(e.keyCode === PREVIOUS_ARROW && e.shiftKey) {
+        e.preventDefault()
+        this.props.previous(this.state.searchQuery);
+      }
+      if(e.keyCode === NEXT_ARROW && e.shiftKey) {
+        e.preventDefault()
+        this.props.next(this.state.searchQuery);
+      }
+      console.log(e.keyCode)
+    }
+    componentWillMount() {
+      document.addEventListener("keydown", this._handleKeyPress);
+    }
+    componentWillUnmount() {
+      document.removeEventListener("keydown", this._handleKeyPress);
+    }
+    render() {
+        const {
+          changed,
+          next,
+          previous,
+          count,
+          index
+          } = this.props;
+
+        return (
+            <div>
+              <input value={this.state.searchQuery} onChange={(evt) => {
+               this.setState({
+                  searchQuery: evt.target.value
+                })
+                changed(evt.target.value || null)
+              }}
+                ref={(ref) => {
+                   this._input = ref;
+                }}
+                />
+              <button onClick={() => {previous(this.state.searchQuery)}}>&lt;</button>
+              <button onClick={() => {next(this.state.searchQuery)}}>&gt;</button>
+              <span>{(count === 0) ? 0 : index + 1 } / {count}</span>
+            </div>
+        )
+    }
+}
 
 class Wrapper extends Component {
   constructor(props) {
@@ -22,6 +87,11 @@ class Wrapper extends Component {
     const resources = generateResources(NB_RESOURCES)
 
     this.state = {
+      resourceById: keyBy(resources, 'id'),
+      searchQuery: null,
+      searchFoundCount: 0,
+      searchFocusIndex: 0,
+      matches: [],
       scrollToResource: undefined,
       dates,
       resources,
@@ -76,10 +146,11 @@ class Wrapper extends Component {
   }
   render() {
 
-      const {dates, resources, events, scrollToResource} = this.state;
+      const {dates, resources, events, scrollToResource, searchQuery} = this.state;
 
       return <div>
           <div>
+            <h3>Demo {NB_RESOURCES} resources</h3>
             <select defaultValue={resources[0].id} ref={(input) => this.resourceInput = input}>
               {
                 resources.map((resource) => {
@@ -101,13 +172,74 @@ class Wrapper extends Component {
             <button onClick={this.handleScrollToRandom}>Scroll to random</button>
           </div>
           <div>
+            <Search
+                index={this.state.searchFocusIndex}
+                count={this.state.searchFoundCount}
+                changed={debounce((searchQuery) => {
+                      this.setState({
+                        searchQuery,
+                        matches: [],
+                        searchFoundCount: 0,
+                        searchFocusIndex: 0
+                      })
+
+                      console.log('Changed', searchQuery)
+
+                }, 300)}
+                previous={(searchQuery) => {
+                    const {
+                      searchFoundCount,
+                      searchFocusIndex,
+                      matches
+                    } = this.state;
+
+                    if(searchFoundCount === 0) {
+                      return;
+                    }
+
+
+                    const nextIndex = (searchFocusIndex - 1) % searchFoundCount
+                    this.setState({
+                      searchFocusIndex: nextIndex,
+                      scrollToResource: matches[nextIndex].id
+                    })
+                }}
+                next={(searchQuery) => {
+                    const {
+                      searchFoundCount,
+                      searchFocusIndex,
+                      matches
+                    } = this.state;
+
+                    if(searchFoundCount === 0) {
+                      return;
+                    }
+
+                    const nextIndex = (searchFocusIndex + 1) % searchFoundCount
+                    this.setState({
+                      searchFocusIndex: nextIndex,
+                      scrollToResource: matches[nextIndex].id
+                    })
+                }}
+                />
+          </div>
+          <div>
             <WeekScheduler
               dates={dates}
               resources={resources}
               events={events}
-              width={800}
+              width={1200}
               height={400}
               scrollToResource={scrollToResource}
+              searchQuery={searchQuery}
+              searchFinished={({matches, searchQuery}) => {
+                  this.setState({
+                    searchFoundCount: matches.length,
+                    searchFocusIndex: 0,
+                    scrollToResource: (matches.length) ? matches[0].id : null,
+                    matches
+                  })
+              }}
               />
             </div>
         </div>
@@ -118,4 +250,20 @@ storiesOf('WeekScheduler', module)
   .add('Basic WeekScheduler with resource column', () => {
 
     return <Wrapper></Wrapper>
+  })
+  .add('placeholder', () => {
+      return             <div style={{width: 100, height: 55}}>
+        <div className="placeholder-quart">
+          <div className="animated-background">
+            <div className="mask h-separator-1"></div>
+            <div className="mask h-separator-2"></div>
+            <div className="mask h-separator-3"></div>
+            <div className="mask v-separator"></div>
+            <div className="mask block-1"></div>
+            <div className="mask block-2"></div>
+            <div className="mask block-3"></div>
+            <div className="mask block-4"></div>
+          </div>
+        </div>
+      </div>
   })

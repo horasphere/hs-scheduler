@@ -3,3 +3,99 @@
     border-bottom: 1px solid #DDD;
   }
 }
+
+@keyframes placeHolderShimmer{
+  0%{
+    background-position: -468px 0
+  }
+  100%{
+    background-position: 468px 0
+  }
+}
+
+
+@left-offset: 5;
+@top-offset: 5;
+@margin: 5px;
+@height: 6px;
+@left-bar-width: 5px;
+
+.placeholder-quart {
+  padding: 5px;
+  background-color: #FFF;
+
+  .animated-background {
+    animation-duration: 1s;
+    animation-fill-mode: forwards;
+    animation-iteration-count: infinite;
+    animation-name: placeHolderShimmer;
+    animation-timing-function: linear;
+    background: #f6f7f8;
+    background: linear-gradient(to right, #eeeeee 8%, #dddddd 18%, #eeeeee 33%);
+    background-size: 800px 104px;
+    height: 4 * @height + 3 * @margin;
+    position: relative;
+  }
+
+  .mask {
+    position: absolute;
+    background-color: #FFF;
+  }
+
+  .h-separator-1 {
+    top: @height;
+    left: 0;
+    right: 0;
+    height: @margin;
+  }
+
+  .h-separator-2 {
+    top: @height * 2 + @margin;
+    left: 3 + @margin;
+    right: 0;
+    height: @margin;
+  }
+
+  .h-separator-3 {
+    top: @height * 3 +  2 * @margin;
+    left: @left-bar-width + @margin;
+    right: 0;
+    height: @margin;
+  }
+
+  .v-separator {
+    top: @height + @margin;
+    left: @left-bar-width;
+    width: @margin;
+    height: 3 * @height + 2 * @margin;
+  }
+
+
+  .block-1 {
+    top: 0;
+    height: @height;
+    right: 0;
+    width: 15px;
+  }
+
+  .block-2 {
+    top: @height + @margin;
+    height: @height;
+    right: 0;
+    width: 25px;
+  }
+
+  .block-3 {
+    top: 2 * @height + 2 * @margin;
+    height: @height;
+    right: 0;
+    width: 5px;
+  }
+
+  .block-4 {
+    top: 3 * @height + 3 * @margin;
+    height: @height;
+    right: 0;
+    width: 10px;
+  }
+}

@@ -35,7 +35,6 @@ class WeekScheduler extends Component {
     return shallowCompare(this, nextProps, nextState)
   }
   render () {
-    console.log('Rendering...')
     const {
       width,
       height,
@@ -58,6 +57,7 @@ class WeekScheduler extends Component {
 
     return (
       <Scheduler
+        {...this.props}
         autoContainerWidth
         width={width}
         height={height}
@@ -66,7 +66,9 @@ class WeekScheduler extends Component {
         className="hs-scheduler--week"
         headerResourceRenderer={() => (<div />)}
         headerContentRenderer={this.headerContentRenderer}
-        rowResourceRenderer={({resource}) => (<div>{resource.id}</div>)}
+        rowResourceRenderer={({resource, searchQuery, searchMatches}) => {
+          return <div style={{backgroundColor: searchMatches.indexOf(resource) > -1 ? 'yellow': 'transparent'}}>{resource.title}</div>
+        }}
         rowContentRenderer={this.rowContentRenderer}
         footerResourceRenderer={() => (<div />)}
         footerContentRenderer={() => (<div />)}
@@ -96,7 +98,7 @@ class WeekScheduler extends Component {
       </FlexRow>
     )
   }
-  rowContentRenderer({resource, isScrolling, isVisible}) {
+  rowContentRenderer({resource, isScrolling, isVisible, searchQuery, searchMatches}) {
 
     const indexedEvents = this.indexedEvents;
 
@@ -120,7 +122,7 @@ class WeekScheduler extends Component {
 
             return (
               <FlexCell key={localDate} className="hs-scheduler--week__row__date" width={100 / dates.length}>
-                { rowDateRenderer({resource, date, isScrolling, isVisible, events: filteredEvents})  }
+                { rowDateRenderer({resource, date, isScrolling, isVisible, events: filteredEvents, searchQuery, searchMatches})  }
               </FlexCell>
             )
           })

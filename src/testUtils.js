@@ -10,13 +10,17 @@ export function mount (markup, node = null) {
   // Unless we attach the mount-node to body, getBoundingClientRect() won't work
   document.body.appendChild(node)
 
-  const component = ReactDOM.render(markup, node)
+  const component = render(markup, node)
 
   return {
     component,
     componentNode: findDOMNode(component),
     node
   }
+}
+
+export function render (markup, node) {
+  return ReactDOM.render(markup, node);
 }
 
 export function unmount (node) {

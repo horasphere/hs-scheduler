@@ -16,5 +16,6 @@ export const eventShape = shape({
 })
 
 export const resourceShape = shape({
-  id: oneOfType([string, number]).isRequired
+  id: oneOfType([string, number]).isRequired,
+  title: string.isRequired
 })

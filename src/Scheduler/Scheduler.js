@@ -7,53 +7,72 @@ import shallowCompare from 'react-addons-shallow-compare'
 import { FlexRow, FlexCell } from './../Flex'
 import generateCellRenderer from './generateCellRenderer'
 import { eventShape, resourceShape } from './propTypes'
+import defaultSearchMethod from './defaultSearchMethod'
 
 const COLUMN_COUNT = 1
 
 const propTypes = {
-  height: PropTypes.number.isRequired,
-  width: PropTypes.number.isRequired,
-  resources: PropTypes.arrayOf(resourceShape).isRequired,
-  noResourcesRenderer: PropTypes.func.isRequired,
-  events: PropTypes.arrayOf(eventShape).isRequired,
-  rowResourceRenderer: PropTypes.func.isRequired,
-  rowContentRenderer: PropTypes.func.isRequired,
-  rowClassName: PropTypes.string.isRequired,
   className: PropTypes.string.isRequired,
+  events: PropTypes.arrayOf(eventShape).isRequired,
+  footerClassName: PropTypes.string.isRequired,
+  footerContentRenderer: PropTypes.func.isRequired,
+  footerHeight: PropTypes.number.isRequired,
+  footerResourceRenderer: PropTypes.func.isRequired,
+  footerVisible: PropTypes.bool.isRequired,
+  height: PropTypes.number.isRequired,
   headerHeight: PropTypes.number.isRequired,
   headerResourceRenderer: PropTypes.func.isRequired,
   headerContentRenderer: PropTypes.func.isRequired,
   headerClassName: PropTypes.string.isRequired,
-  footerVisible: PropTypes.bool.isRequired,
-  footerHeight: PropTypes.number.isRequired,
-  footerResourceRenderer: PropTypes.func.isRequired,
-  footerContentRenderer: PropTypes.func.isRequired,
-  footerClassName: PropTypes.string.isRequired,
-  resourceColumnWidth: PropTypes.number.isRequired, // width in %
+  noResourcesRenderer: PropTypes.func.isRequired,
+  resources: PropTypes.arrayOf(resourceShape).isRequired,
   resourceColumnVisible: PropTypes.bool.isRequired, // TODO could rename to resourceVisible
-  scrollToResource: PropTypes.string
-
+  resourceColumnWidth: PropTypes.number.isRequired, // width in %
+  rowClassName: PropTypes.string.isRequired,
+  rowContentRenderer: PropTypes.func.isRequired,
+  rowResourceRenderer: PropTypes.func.isRequired,
+  searchQuery: PropTypes.any,
+  searchMethod: PropTypes.func,
+  searchFinished: PropTypes.func,
+  scrollToResource: PropTypes.string,
+  width: PropTypes.number.isRequired
 }
 
 const defaultProps = {
-  noResourcesRenderer: () => null,
-  scrollToResource: undefined,
   className: '',
+  footerClassName: '',
+  footerHeight: 0,
+  footerVisible: true,
   headerHeight: 0,
   headerClassName: '',
-  rowClassName: '',
-  footerVisible: true,
-  footerHeight: 0,
-  footerClassName: '',
+  noResourcesRenderer: () => null,
+  resourceColumnVisible: true,
   resourceColumnWidth: 12,
-  resourceColumnVisible: true
+  rowClassName: '',
+  searchQuery: null,
+  searchMethod: defaultSearchMethod,
+  searchFinished: () => {},
+  scrollToResource: undefined
 }
 
 class Scheduler extends Component {
   constructor (props) {
     super(props)
 
+    this.state = {
+      searchMatches: []
+    }
+
     this.rowRenderer = this.rowRenderer.bind(this)
+    this.search = this.search.bind(this)
+  }
+  componentWillMount() {
+    this.search(this.props)
+  }
+  componentWillReceiveProps(nextProps) {
+    if(this.props.searchQuery !== nextProps.searchQuery) {
+      this.search(nextProps)
+    }
   }
   shouldComponentUpdate (nextProps, nextState) {
     return shallowCompare(this, nextProps, nextState)
@@ -71,8 +90,11 @@ class Scheduler extends Component {
       footerHeight,
       height,
       width,
-      scrollToResource
+      scrollToResource,
+      searchQuery
     } = props
+
+    const { searchMatches}  = this.state;
 
     const resourceById = keyBy(resources, 'id')
 
@@ -80,7 +102,9 @@ class Scheduler extends Component {
       resources,
       resourceById: resourceById,
       eventById: keyBy(events, 'id'),
-      rowRenderer: this.rowRenderer
+      rowRenderer: this.rowRenderer,
+      searchMatches,
+      searchQuery
     })
 
     const scrollToRow = (scrollToResource && resourceById[scrollToResource]) ? resources.indexOf(resourceById[scrollToResource]) : undefined;
@@ -92,7 +116,7 @@ class Scheduler extends Component {
 
     return (
       <div className={cn('hs-scheduler', className)}>
-
+        { this.getRenderedHeader() }
         <CellMeasurer
           cellRenderer={cellRenderer}
           columnCount={COLUMN_COUNT}
@@ -102,15 +126,15 @@ class Scheduler extends Component {
           {({ getRowHeight }) => (
             <VirtualizedGrid
               {...props}
-              autoContainerWidth={false}
-              estimatedRowSize={75}
+              autoContainerWidth
+              scrollingResetTimeInterval={300}
               width={width}
               height={bodyHeight}
               columnCount={COLUMN_COUNT}
               columnWidth={width}
               overscanColumnCount={0}
-              overscanRowCount={20}
-              rowHeight={getRowHeight}
+              overscanRowCount={10}
+              rowHeight={300}
               rowCount={resources.length}
               cellRenderer={cellRenderer}
               scrollToAlignment="start"
@@ -127,6 +151,28 @@ class Scheduler extends Component {
 
       </div>
     )
+  }
+  search(props) {
+    let searchMatches = [];
+
+    const {
+      resources,
+      searchMethod,
+      searchQuery,
+      searchFinished
+    } = props;
+
+    if(searchQuery !== null) {
+      searchMatches = resources.filter((resource) => {
+          return searchMethod({resource, searchQuery})
+      })
+    }
+
+    this.setState({
+      searchMatches
+    })
+
+    searchFinished({matches: searchMatches, searchQuery})
   }
   get contentColumnWidth () {
     const {
@@ -190,7 +236,9 @@ class Scheduler extends Component {
     eventById,
     isScrolling,
     isVisible,
-    key
+    key,
+    searchQuery,
+    searchMatches
     }) {
     const {
       rowClassName,
@@ -200,18 +248,21 @@ class Scheduler extends Component {
       resourceColumnVisible
       } = this.props
 
+    //TODO remove backgroundColor
     return (
-      <FlexRow key={key} style={style} className={cn('hs-scheduler__row', rowClassName)}>
-        {(resourceColumnVisible)
-          ? <FlexCell width={resourceColumnWidth}>
-            { rowResourceRenderer({resource}) }
+      <div key={key} style={{...style, backgroundColor: 'transparent'}} className={cn('hs-scheduler__row', rowClassName)}>
+        <FlexRow>
+          {(resourceColumnVisible)
+            ? <FlexCell width={resourceColumnWidth}>
+              { rowResourceRenderer({resource, searchQuery, searchMatches}) }
+            </FlexCell>
+            : null
+          }
+          <FlexCell width={this.contentColumnWidth}>
+            { rowContentRenderer({resource, isScrolling, isVisible}) }
           </FlexCell>
-          : null
-        }
-        <FlexCell width={this.contentColumnWidth}>
-          { rowContentRenderer({resource, isScrolling, isVisible}) }
-        </FlexCell>
-      </FlexRow>
+        </FlexRow>
+      </div>
     )
   }
 }

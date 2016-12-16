@@ -1,6 +1,9 @@
 import random from 'lodash/random';
 import sample from 'lodash/sample';
 import moment from 'moment';
+import Chance from 'chance'
+
+const chance = new Chance()
 
 import { listDates, LOCAL_DATE_FORMAT } from './../utils/date'
 
@@ -27,7 +30,10 @@ export function generateResources(size) {
   const resources = [];
 
   for(var i=0; i < size; i++) {
-    resources.push({id: `resource_${i}`})
+    resources.push({
+      id: `resource_${i}`,
+      title: chance.name()
+    })
   }
 
   return resources;

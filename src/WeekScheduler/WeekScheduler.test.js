@@ -50,7 +50,7 @@ test('should accept :rowDateRenderer as props', (t) => {
   const today = new Date()
   const tomorrow = moment(today).add(1, 'days').toDate()
 
-  const resources = [{id: 'r1'}]
+  const resources = [{id: 'r1', title: 't1'}]
   const events = [
     {id: 'e1', resourceId: 'r1', start: today, end: today },
     {id: 'e2', resourceId: 'r2', start: today, end: today },

@@ -2,12 +2,11 @@ import test from 'tape'
 import React from 'react'
 
 import Scheduler from './Scheduler'
-import { mount, unmount } from './../testUtils'
+import { mount, unmount, render } from './../testUtils'
 
 function getScheduler (props = {}) {
   return (
     <Scheduler
-      date={new Date()}
       events={[]}
       width={300}
       height={300}
@@ -23,7 +22,7 @@ function getScheduler (props = {}) {
 }
 
 test('Scheduler rowRenderer()', (t) => {
-  const resources = [{id: 'r1'}]
+  const resources = [{id: 'r1', title: 't1'}]
   const events = [{id: 'e1', resourceId: 'r1', start: new Date(), end: new Date()}]
 
   let rowResourceRendererCalled = false
@@ -75,7 +74,7 @@ test('Scheduler noResourcesRenderer()', (t) => {
 
 test('should be able to hide resource column', (t) => {
   const { node, componentNode } = mount(getScheduler({
-    resources: [{id: '1'}],
+    resources: [{id: '1', title: 't1'}],
     events: [],
     resourceColumnVisible: false
   }))
@@ -138,7 +137,7 @@ test('should be able to customize Footer', (t) => {
 })
 
 test('should be able to hide Footer', (t) => {
-  let { node, componentNode } = mount(getScheduler({
+  const { node, componentNode } = mount(getScheduler({
     resources: [],
     events: [],
     footerVisible: false
@@ -150,3 +149,75 @@ test('should be able to hide Footer', (t) => {
   t.end()
 })
 
+test('should not re-render unless props have changed', (t) => {
+  let rowResourceRendererCalled = false;
+  const params = {
+    resources: [{id: 'r1', title: 't1'}],
+    events: [],
+    rowResourceRenderer: function () {
+      rowResourceRendererCalled = true
+      return null
+    }
+  }
+
+  const { node, componentNode } = mount(getScheduler(params))
+
+  t.ok(rowResourceRendererCalled, 'should render');
+
+  rowResourceRendererCalled = false
+  render(getScheduler(params), node)
+  t.equal(rowResourceRendererCalled, false, 'should not re-render');
+
+  unmount(node)
+  t.end()
+})
+
+test('should search and find matching resources', (t) => {
+
+  let _matches = null;
+  let _searchQuery = null;
+  const params = {
+    resources: [{id: 'r1', title: 'title 1 foo'}, {id: 'r2', title: 'title 2 bar'}, {id: 'r3', title: 'title 3 foo'}],
+    events: [],
+    searchFinished: ({matches, searchQuery}) => {
+        _matches = matches;
+        _searchQuery = searchQuery
+    }
+  }
+
+  const { node, componentNode } = mount(getScheduler({...params, searchQuery: null}))
+
+  t.equal(_matches.length, 0, 'when search query is null should have no matches');
+
+  render(getScheduler({...params, searchQuery: 'bar'}), node)
+  t.equal(_matches.length, 1, 'should find (1) matches');
+
+  render(getScheduler({...params, searchQuery: 'foo'}), node)
+  t.equal(_matches.length, 2, 'should find multiple matches');
+
+  unmount(node)
+  t.end()
+})
+
+test('should accept custom search method', (t) => {
+  let _matches = null;
+  let _searchQuery = null;
+  const params = {
+    resources: [{id: 'r1', title: 'title 1 foo'}, {id: 'r2', title: 'title 2 bar'}, {id: 'r3', title: 'title 3 foo'}],
+    events: [],
+    searchFinished: ({matches, searchQuery}) => {
+      _matches = matches;
+      _searchQuery = searchQuery
+    }
+  }
+
+  const startWithSearchMethod = ({resource, searchQuery}) => (resource.title.indexOf(searchQuery) === 0);
+  const { node, componentNode } = mount(getScheduler({...params, searchQuery: 'foo', searchMethod: startWithSearchMethod}))
+  t.equal(_matches.length, 0, 'should not matche any resources');
+
+  render(getScheduler({...params, searchQuery: 'title'}), node)
+  t.equal(_matches.length, 3, 'should find multiple matches');
+
+  unmount(node)
+  t.end()
+})

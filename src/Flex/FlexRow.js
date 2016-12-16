@@ -29,7 +29,7 @@ class FlexRow extends Component {
       display: 'flex',
       flex: '1 1 auto',
       flexDirection: 'row',
-      flexWrap: 'wrap',
+      flexWrap: 'nowrap',
       ...style
     }
 

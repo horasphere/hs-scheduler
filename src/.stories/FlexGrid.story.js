@@ -36,12 +36,12 @@ storiesOf('Flex grid', module)
                       const filtered = events.filter((event) => {
                           return event.resourceId === resource.id && moment(event.start).format(LOCAL_DATE_FORMAT) === localDate
                       })
+                      const childs =  filtered.map((event) => (
+                          <Quart start={event.start} end={event.end} />
+                      ))
+
                       return <FlexCell key={localDate} width={100 / dates.length} style={{backgroundColor: (idx % 2 === 0) ? 'transparent' : 'blue', opacity: (idx % 2 === 0) ? 1 : 0.2}}>
-                        {
-                          filtered.map((event) => (
-                            <Quart start={event.start} end={event.end} />
-                          ))
-                        }
+                          <div> {childs }</div>
                       </FlexCell>
                     })
 

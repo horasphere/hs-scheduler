@@ -26,6 +26,9 @@ Abstract scheduler grid
 - [ ] loadingComponent
 - [ ] emptyComponent
 
+#### Improvements
+- [ ] compute and cache row height based on max number of shift by day
+
 
 # WeekScheduler
 
