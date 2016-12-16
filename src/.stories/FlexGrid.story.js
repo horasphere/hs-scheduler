@@ -12,7 +12,7 @@ import { listDates, LOCAL_DATE_FORMAT } from './../utils/date'
 import { randomEvent, generateResources, generateEvents } from './helpers'
 import { Quart } from './../Quart'
 
-const resources = generateResources(350);
+const resources = generateResources(50);
 const dates = listDates(new Date(), 7);
 const events = generateEvents(resources, dates);
 
@@ -87,6 +87,21 @@ storiesOf('Flex grid', module)
       }
       render () {
         return (
+          <div style={{width: 800}}>
+            <div class="hs-scheduler__header" style={{boxSizing: 'border-box', display: 'flex', flex: '1 1 auto', flexFlow: 'row nowrap', height: 30}}>
+              <div className="flex-cell" style={{boxSizing: 'border-box', flex: '1 1 20%', maxWidth: '20%'}}><div></div></div>
+              <div className="flex-cell-date" style={{boxSizing: 'border-box', flex: '1 1 80%', maxWidth: '80%'}}>
+                  <div class="" style={{boxSizing: 'border-box', display: 'flex', flex: '1 1 auto', flexFlow: 'row nowrap'}}>
+                      <div class="hs-scheduler--week__header__date" style={{boxSizing: 'border-box', flex: '1 1 14.2857%', maxWidth: '14.2857%'}}>FRI 16 DEC</div>
+                      <div class="hs-scheduler--week__header__date" style={{boxSizing: 'border-box', flex: '1 1 14.2857%', maxWidth: '14.2857%'}}>SAT 17 DEC</div>
+                    <div class="hs-scheduler--week__header__date" style={{boxSizing: 'border-box', flex: '1 1 14.2857%', maxWidth: '14.2857%'}}>SUN 18 DEC</div>
+                    <div class="hs-scheduler--week__header__date" style={{boxSizing: 'border-box', flex: '1 1 14.2857%', maxWidth: '14.2857%'}}>MON 19 DEC</div>
+                    <div class="hs-scheduler--week__header__date" style={{boxSizing: 'border-box', flex: '1 1 14.2857%', maxWidth: '14.2857%'}}>TUE 20 DEC</div>
+                    <div class="hs-scheduler--week__header__date" style={{boxSizing: 'border-box', flex: '1 1 14.2857%', maxWidth: '14.2857%'}}>WED 21 DEC</div>
+                    <div class="hs-scheduler--week__header__date" style={{boxSizing: 'border-box', flex: '1 1 14.2857%', maxWidth: '14.2857%'}}>THU 22 DEC</div>
+                  </div>
+              </div>
+          </div>
           <CellMeasurer
             cellRenderer={this._cellRenderer}
             columnCount={1}
@@ -108,6 +123,7 @@ storiesOf('Flex grid', module)
                 />
             )}
           </CellMeasurer>
+          </div>
         )
       }
     }

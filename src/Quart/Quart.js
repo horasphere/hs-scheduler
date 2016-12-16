@@ -6,28 +6,36 @@ import './hora.less'
 
 class Quart extends Component {
   render() {
-    return (
-        <div className="h-quart-block">
+    const {
+      withTask,
+      assignationCount
+      } = this.props
 
-          <div className="h-quart-block-header">
-            <span className="type-icon"><i className="fa fa-thumbs-up"></i></span>
+
+    return (
+      <div className="h-quart-block">
+
+        <div className="h-quart-block-header">
+          <span className="type-icon"><i className="fa fa-thumbs-up"></i></span>
                         <span className="title"
                               title="A17_126_AMB Romulus Wilfrance">A17_126_AMB Romulus Wilfrance</span>
-            <span className="total-hour">(8.5)</span>
-            <span className="source-icon"><i className="fa fa-chain"></i></span></div>
+          <span className="total-hour">(8.5)</span>
+          <span className="source-icon"><i className="fa fa-chain"></i></span></div>
 
-          <div className="h-quart-block-body">
-            <div className="h-assignation-wrapper">
+        <div className="h-quart-block-body">
+          <div className="h-assignation-wrapper">
 
-              <div className="h-assignation-block-wrapper WORK" style={{borderLeftColor: "#ffffff"}}>
-                <div className="period">
-                  <span className="hours"> {moment(this.props.start).format('h:mm')} - {moment(this.props.end).format('h:mm')}</span>
-                  <span className="total">(8.5)</span>
-                </div>
+            <div className="h-assignation-block-wrapper WORK" style={{borderLeftColor: "#ffffff"}}>
+              <div className="period">
+                <span className="hours"> {moment(this.props.start).format('h:mm')}
+                  - {moment(this.props.end).format('h:mm')}</span>
+                <span className="total">(8.5)</span>
+              </div>
 
     <span className="flex-container"><div className="affectation ">Ambassadeur</div><span
       className="h-quart-block-footer-toolbar flex-container shrink-footer"><div className="pull-left">
-      <div className="badge-container flex-container"></div>
+      <div className="badge-container flex-container">
+      </div>
     </div>
 
     <div className="pull-right">
@@ -55,17 +63,17 @@ class Quart extends Component {
     </div>
 </span></span>
 
-              </div>
-            </div>
-
-            <div className="h-task-wrapper">
-              <ul className="fa-ul">
-
-              </ul>
             </div>
           </div>
 
+          <div className="h-task-wrapper">
+            <ul className="fa-ul">
+
+            </ul>
+          </div>
         </div>
+
+      </div>
     )
   }
 }

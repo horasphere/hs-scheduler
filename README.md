@@ -27,8 +27,8 @@ Abstract scheduler grid
 - [ ] emptyComponent
 
 #### Improvements
-- [ ] compute and cache row height based on max number of shift by day
-
+- [x] compute and cache row height based on max number of shift by day
+- [ ] build a lexical key based on the quart sequence
 
 # WeekScheduler
 

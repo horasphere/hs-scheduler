@@ -30,6 +30,7 @@ class WeekScheduler extends Component {
 
     this.headerContentRenderer = this.headerContentRenderer.bind(this)
     this.rowContentRenderer = this.rowContentRenderer.bind(this)
+    this.footerContentRenderer = this.footerContentRenderer.bind(this)
   }
   shouldComponentUpdate (nextProps, nextState) {
     return shallowCompare(this, nextProps, nextState)
@@ -71,7 +72,8 @@ class WeekScheduler extends Component {
         }}
         rowContentRenderer={this.rowContentRenderer}
         footerResourceRenderer={() => (<div />)}
-        footerContentRenderer={() => (<div />)}
+        footerContentRenderer={this.footerContentRenderer}
+        footerVisible={true}
         scrollToResource={scrollToResource}
         ref={(ref) => {
             this._scheduler = ref
@@ -79,7 +81,7 @@ class WeekScheduler extends Component {
         />
     )
   }
-  headerContentRenderer() {
+  headerContentRenderer({style}) {
     const {
       headerDateRenderer,
       dates
@@ -92,7 +94,7 @@ class WeekScheduler extends Component {
             const localDate = moment(date).format(LOCAL_DATE_FORMAT)
 
             return (
-              <FlexCell key={localDate} className="hs-scheduler--week__header__date" width={100 / dates.length}>
+              <FlexCell style={style} key={localDate} className="hs-scheduler--week__header__date" width={100 / dates.length}>
                 { headerDateRenderer({date}) }
               </FlexCell>
             )
@@ -101,7 +103,7 @@ class WeekScheduler extends Component {
       </FlexRow>
     )
   }
-  rowContentRenderer({resource, isScrolling, isVisible, searchQuery, searchMatches}) {
+  rowContentRenderer({resource, isScrolling, isVisible, searchQuery, searchMatches, style}) {
 
     const indexedEvents = this.indexedEvents;
 
@@ -124,8 +126,29 @@ class WeekScheduler extends Component {
             const filteredEvents = indexedEvents[idx] || [];
 
             return (
-              <FlexCell key={localDate} className="hs-scheduler--week__row__date" width={100 / dates.length}>
+              <FlexCell style={style} key={localDate} className="hs-scheduler--week__row__date" width={100 / dates.length}>
                 { rowDateRenderer({resource, date, isScrolling, isVisible, events: filteredEvents, searchQuery, searchMatches})  }
+              </FlexCell>
+            )
+          })
+        }
+      </FlexRow>
+    )
+  }
+  footerContentRenderer() {
+    const {
+      dates
+      } = this.props;
+
+    return (
+      <FlexRow>
+        {
+          dates.map((date) => {
+            const localDate = moment(date).format(LOCAL_DATE_FORMAT)
+
+            return (
+              <FlexCell key={localDate} className="hs-scheduler--week__footer__date" width={100 / dates.length}>
+                { localDate }
               </FlexCell>
             )
           })
