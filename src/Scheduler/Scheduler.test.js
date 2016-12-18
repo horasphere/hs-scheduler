@@ -76,7 +76,7 @@ test('should be able to hide resource column', (t) => {
   const { node, componentNode } = mount(getScheduler({
     resources: [{id: '1', title: 't1'}],
     events: [],
-    resourceColumnVisible: false
+    resourceVisible: false
   }))
 
   t.equal(componentNode.querySelector('.hs-scheduler__header').children.length, 1, 'content only should be renderer in header')

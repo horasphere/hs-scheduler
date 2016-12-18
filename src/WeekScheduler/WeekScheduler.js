@@ -1,5 +1,6 @@
 import React, { Component, PropTypes } from 'react'
-import moment from 'moment';
+import moment from 'moment'
+import omit from 'lodash/omit'
 import shallowCompare from 'react-addons-shallow-compare'
 
 import { Scheduler, resourceShape, eventShape } from './../Scheduler'
@@ -8,20 +9,22 @@ import defaultRowDateRenderer from './defaultRowDateRenderer'
 import { FlexRow, FlexCell } from './../Flex'
 import { LOCAL_DATE_FORMAT } from './../utils/date'
 
+const schedulerPropTypes = omit(Scheduler.propTypes, [
+  'headerContentRenderer',
+  'rowContentRenderer',
+  'footerContentRenderer'
+]);
+
 const propTypes = {
-  height: PropTypes.number.isRequired,
-  width: PropTypes.number.isRequired,
+  ...schedulerPropTypes,
   dates: PropTypes.arrayOf(PropTypes.instanceOf(Date)).isRequired,
-  resources: PropTypes.arrayOf(resourceShape).isRequired,
-  events: PropTypes.arrayOf(eventShape).isRequired,
-  headerDateRenderer: PropTypes.func.isRequired,
-  scrollToResource: PropTypes.string
+  headerDateRenderer: PropTypes.func.isRequired
 }
 
 const defaultProps = {
+  ...Scheduler.defaultProps,
   headerDateRenderer: defaultHeaderDateRenderer,
-  rowDateRenderer: defaultRowDateRenderer,
-  scrollToResource: undefined
+  rowDateRenderer: defaultRowDateRenderer
 }
 
 class WeekScheduler extends Component {
@@ -37,11 +40,7 @@ class WeekScheduler extends Component {
   }
   render () {
     const {
-      width,
-      height,
       events,
-      resources,
-      scrollToResource
       } = this.props;
 
     // TODO remove
@@ -59,22 +58,10 @@ class WeekScheduler extends Component {
     return (
       <Scheduler
         {...this.props}
-        autoContainerWidth
-        width={width}
-        height={height}
-        resources={resources}
-        events={events}
         className="hs-scheduler--week"
-        headerResourceRenderer={() => (<div />)}
         headerContentRenderer={this.headerContentRenderer}
-        rowResourceRenderer={({resource, searchQuery, searchMatches}) => {
-          return <div style={{backgroundColor: searchMatches.indexOf(resource) > -1 ? 'yellow': 'transparent'}}>{resource.title}<br />{resource.id}</div>
-        }}
         rowContentRenderer={this.rowContentRenderer}
-        footerResourceRenderer={() => (<div />)}
         footerContentRenderer={this.footerContentRenderer}
-        footerVisible={true}
-        scrollToResource={scrollToResource}
         ref={(ref) => {
             this._scheduler = ref
         }}

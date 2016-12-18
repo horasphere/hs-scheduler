@@ -13,7 +13,7 @@ import { randomEvent, generateResources, generateEvents } from './helpers'
 
 import './../WeekScheduler/weekscheduler.less'
 
-const NB_RESOURCES = 1000;
+const NB_RESOURCES = 5000;
 
 class Search extends Component {
     constructor(props) {

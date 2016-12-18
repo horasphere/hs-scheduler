@@ -7,6 +7,7 @@ import cn from 'classnames'
 import shallowCompare from 'react-addons-shallow-compare'
 import moment from 'moment'
 
+import defaultRowResourceRenderer from './defaultRowResourceRenderer'
 import { FlexRow, FlexCell } from './../Flex'
 import generateCellRenderer from './generateCellRenderer'
 import { eventShape, resourceShape } from './propTypes'
@@ -17,25 +18,25 @@ import { LOCAL_DATE_FORMAT } from './../utils/date'
 const COLUMN_COUNT = 1
 
 const propTypes = {
-  className: PropTypes.string.isRequired,
+  className: PropTypes.string,
   events: PropTypes.arrayOf(eventShape).isRequired,
-  footerClassName: PropTypes.string.isRequired,
+  footerClassName: PropTypes.string,
   footerContentRenderer: PropTypes.func.isRequired,
-  footerHeight: PropTypes.number.isRequired,
-  footerResourceRenderer: PropTypes.func.isRequired,
-  footerVisible: PropTypes.bool.isRequired,
+  footerHeight: PropTypes.number,
+  footerResourceRenderer: PropTypes.func,
+  footerVisible: PropTypes.bool,
   height: PropTypes.number.isRequired,
-  headerHeight: PropTypes.number.isRequired,
-  headerResourceRenderer: PropTypes.func.isRequired,
+  headerHeight: PropTypes.number,
+  headerResourceRenderer: PropTypes.func,
   headerContentRenderer: PropTypes.func.isRequired,
-  headerClassName: PropTypes.string.isRequired,
-  noResourcesRenderer: PropTypes.func.isRequired,
+  headerClassName: PropTypes.string,
+  noResourcesRenderer: PropTypes.func,
   resources: PropTypes.arrayOf(resourceShape).isRequired,
-  resourceColumnVisible: PropTypes.bool.isRequired, // TODO could rename to resourceVisible
-  resourceColumnWidth: PropTypes.number.isRequired, // width in %
-  rowClassName: PropTypes.string.isRequired,
+  resourceVisible: PropTypes.bool,
+  resourceColumnWidth: PropTypes.number, // width in %
+  rowClassName: PropTypes.string,
   rowContentRenderer: PropTypes.func.isRequired,
-  rowResourceRenderer: PropTypes.func.isRequired,
+  rowResourceRenderer: PropTypes.func,
   searchQuery: PropTypes.any,
   searchMethod: PropTypes.func,
   searchFinished: PropTypes.func,
@@ -46,14 +47,17 @@ const propTypes = {
 const defaultProps = {
   className: '',
   footerClassName: '',
-  footerHeight: 0,
+  footerHeight: 30,
   footerVisible: true,
+  footerResourceRenderer: () => null,
   headerHeight: 30,
   headerClassName: '',
+  headerResourceRenderer: () => null,
   noResourcesRenderer: () => null,
-  resourceColumnVisible: true,
+  resourceVisible: true,
   resourceColumnWidth: 12,
   rowClassName: '',
+  rowResourceRenderer: defaultRowResourceRenderer,
   searchQuery: null,
   searchMethod: defaultSearchMethod,
   searchFinished: () => {},
@@ -122,16 +126,6 @@ class Scheduler extends Component {
     if (footerVisible) {
       bodyHeight -= footerHeight
     }
-    //TODO remove
-    const keyMap = {}
-    const keyStats = {
-      hits: 0,
-      misses: 0
-    }
-
-    const logStats = debounce(function() {
-      console.log('key stats:', keyStats, keyMap)
-    }, 500)
 
     return (
       <div className={cn('hs-scheduler', className)} style={{width: width}}>
@@ -143,25 +137,10 @@ class Scheduler extends Component {
           width={width}
           cellSizeCache={new KeyBasedCellSizeCache({
             buildRowKey: (index) => {
-                let max = 0;
-                const countByDate = {};
-
                 const id = resources[index].id;
-
-                //eventsByResourceId[id].forEach((event) => {
-                //    const localDate = moment(event.start).format(LOCAL_DATE_FORMAT)
-                //
-                //    if(!countByDate[localDate]) {
-                //      countByDate[localDate] = 0
-                //
-                //    }
-                //    countByDate[localDate]++;
-                //
-                //    max = Math.max(max, countByDate[localDate])
-                //})
                 const eventsByDates = groupBy(eventsByResourceId[id], (event) => (moment(event.start).format(LOCAL_DATE_FORMAT)))
 
-                const key = Object.keys(eventsByDates)
+                return Object.keys(eventsByDates)
                   .map((localDate) => {
                       return eventsByDates[localDate].length
                   })
@@ -170,17 +149,6 @@ class Scheduler extends Component {
                     return !pos || item != ary[pos - 1];
                 })
                 .join('|')
-
-
-                if(keyMap[key])
-                  keyStats.hits++
-                 else
-                  keyStats.misses++
-
-                keyMap[key] = true;
-
-                logStats();
-                return key;
             }
           })}
           ref={(ref) => {
@@ -237,7 +205,6 @@ class Scheduler extends Component {
       this._cellMeasurer.resetMeasurementForRow(resourceIndex)
       this._virtualGrid.recomputeGridSize({columnIndex: 0, rowIndex: resourceIndex})
     }
-
   }
   search(props) {
     let searchMatches = [];
@@ -264,10 +231,10 @@ class Scheduler extends Component {
   get contentColumnWidth () {
     const {
       resourceColumnWidth,
-      resourceColumnVisible
+      resourceVisible
     } = this.props
 
-    return (resourceColumnVisible) ? 100 - resourceColumnWidth : 100
+    return (resourceVisible) ? 100 - resourceColumnWidth : 100
   }
   getRenderedHeader () {
     const {
@@ -276,7 +243,7 @@ class Scheduler extends Component {
       headerResourceRenderer,
       headerContentRenderer,
       resourceColumnWidth,
-      resourceColumnVisible
+      resourceVisible
       } = this.props
 
     const style = {
@@ -284,8 +251,8 @@ class Scheduler extends Component {
     }
 
     return (<FlexRow style={{height: headerHeight, paddingRight: 17}} className={cn('hs-scheduler__header', headerClassName)}>
-      {(resourceColumnVisible)
-            ? <FlexCell width={resourceColumnWidth}>
+      {(resourceVisible)
+            ? <FlexCell className="hs-scheduler__header__resource" width={resourceColumnWidth}>
               { headerResourceRenderer() }
             </FlexCell>
             : null
@@ -303,12 +270,12 @@ class Scheduler extends Component {
       footerResourceRenderer,
       footerContentRenderer,
       resourceColumnWidth,
-      resourceColumnVisible
+      resourceVisible
       } = this.props
 
     return (<FlexRow style={{height: footerHeight}} className={cn('hs-scheduler__footer', footerClassName)}>
-      {(resourceColumnVisible)
-          ? <FlexCell width={resourceColumnWidth}>
+      {(resourceVisible)
+          ? <FlexCell className="hs-scheduler__footer__resource" width={resourceColumnWidth}>
             { footerResourceRenderer() }
           </FlexCell>
           : null
@@ -336,7 +303,7 @@ class Scheduler extends Component {
       rowResourceRenderer,
       rowContentRenderer,
       resourceColumnWidth,
-      resourceColumnVisible
+      resourceVisible
       } = this.props
 
     const sectionStyle = {
@@ -346,8 +313,8 @@ class Scheduler extends Component {
     return (
       <div key={key} style={{...style}} className={cn('hs-scheduler__row', rowClassName)}>
         <FlexRow>
-          {(resourceColumnVisible)
-            ? <FlexCell width={resourceColumnWidth}>
+          {(resourceVisible)
+            ? <FlexCell className="hs-scheduler__row__resource" width={resourceColumnWidth}>
               { rowResourceRenderer({resource, searchQuery, searchMatches, style: sectionStyle}) }
             </FlexCell>
             : null
