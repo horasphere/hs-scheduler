@@ -5,8 +5,8 @@
  */
 export default class KeyBasedCellSizeCache {
   constructor ({
-      buildColumnKey = (index) => (0),
-      buildRowKey = (index) => (0)
+      buildColumnKey = (index) => (index),
+      buildRowKey = (index) => (index)
     } = {}) {
     this._buildColumnKey = buildColumnKey;
     this._buildRowKey = buildRowKey;

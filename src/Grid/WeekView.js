@@ -2,8 +2,8 @@ import React, {Component, PropTypes} from 'react'
 import moment from 'moment'
 
 import { resourceShape, weekComponentsShape } from './propTypes'
-import {LOCAL_DATE_FORMAT} from './utils/date'
-import { indexResources } from './utils/resourceHelper'
+import {LOCAL_DATE_FORMAT} from './../utils/date'
+import { indexResources } from './../utils/resourceHelper'
 import WeekBodyRow from './WeekBodyRow'
 
 const NB_OF_DAYS = 7

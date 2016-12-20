@@ -10,7 +10,7 @@ import { FlexRow, FlexCell } from './../Flex'
 import { FlexGrid, ScheduleRow } from './../Playground'
 import { listDates, LOCAL_DATE_FORMAT } from './../utils/date'
 import { randomEvent, generateResources, generateEvents } from './helpers'
-import { Quart } from './../Quart'
+import { Quart } from './Quart'
 
 const resources = generateResources(50);
 const dates = listDates(new Date(), 7);

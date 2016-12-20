@@ -2,16 +2,8 @@ import React, {Component, PropTypes} from 'react';
 import moment from 'moment';
 
 import { FlexRow, FlexCell } from './../Flex'
-import { Quart } from './../Quart'
+import { Quart } from './../.stories/Quart'
 import { listDates, LOCAL_DATE_FORMAT } from './../utils/date'
-
-const propTypes = {
-
-}
-
-const defaultProps = {
-
-}
 
 class SchedulerRow extends Component {
     render() {
@@ -46,8 +38,5 @@ class SchedulerRow extends Component {
         )
     }
 }
-
-SchedulerRow.propTypes = propTypes;
-SchedulerRow.defaultProps = defaultProps;
 
 export default SchedulerRow;

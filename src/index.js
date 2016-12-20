@@ -1,3 +1,9 @@
-import Scheduler from './Grid'
+import { AutoSizer } from 'react-virtualized'
+import WeekScheduler from './WeekScheduler'
+import Grid from './Grid'
 
-export default Scheduler
+export {
+  AutoSizer,
+  Grid,
+  WeekScheduler
+}

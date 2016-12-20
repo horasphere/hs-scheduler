@@ -2,6 +2,10 @@ import moment from 'moment'
 
 export const LOCAL_DATE_FORMAT = 'YYYY-MM-DD'
 
+export function localDate(date) {
+  return moment(date).format(LOCAL_DATE_FORMAT);
+}
+
 export function compareDates(d1, d2) {
   const d1Value = moment(d1).format(LOCAL_DATE_FORMAT)
   const d2Value = moment(d2).format(LOCAL_DATE_FORMAT)

@@ -5,8 +5,8 @@ import sample from 'lodash/sample';
 import random from 'lodash/random';
 import moment from 'moment';
 import names from './names';
-import Scheduler from './../';
-import './../scheduler.less';
+import Grid from './../Grid';
+import './../Grid/scheduler.less';
 
 const dates = [
     '06',
@@ -117,7 +117,7 @@ class WeekView extends Component {
                 <div style={{
                     height: 250
                 }}>
-                    <Scheduler
+                    <Grid
                         resources={this.state.resources}
                         showResourcesColumn={this.state.showResourcesColumn}
                         startOfWeek={0}

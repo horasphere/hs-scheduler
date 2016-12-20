@@ -2,9 +2,9 @@ import React, { Component, PropTypes } from 'react'
 import elementType from 'react-prop-types/lib/elementType'
 import moment from 'moment'
 
-import { getAssignmentsByResourceAndDate } from './utils/resourceHelper'
+import { getAssignmentsByResourceAndDate } from './../utils/resourceHelper'
 import {resourceShape} from './propTypes'
-import {LOCAL_DATE_FORMAT} from './utils/date'
+import {LOCAL_DATE_FORMAT} from './../utils/date'
 
 const propTypes = {
   dates: PropTypes.arrayOf(PropTypes.instanceOf(Date)).isRequired,

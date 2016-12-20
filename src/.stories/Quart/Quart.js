@@ -1,16 +1,15 @@
 import React, {Component} from 'react';
 import moment from 'moment';
-import {LOCAL_DATE_FORMAT} from './../utils/date';
+import shallowCompare from 'react-addons-shallow-compare'
+
 
 import './hora.less'
 
 class Quart extends Component {
+  shouldComponentUpdate (nextProps, nextState) {
+    return shallowCompare(this, nextProps, nextState)
+  }
   render() {
-    const {
-      withTask,
-      assignationCount
-      } = this.props
-
 
     return (
       <div className="h-quart-block">

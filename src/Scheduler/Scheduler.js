@@ -15,11 +15,9 @@ import defaultSearchMethod from './defaultSearchMethod'
 import KeyBasedCellSizeCache from './keyBasedCellSizeCache'
 import { LOCAL_DATE_FORMAT } from './../utils/date'
 
-const COLUMN_COUNT = 1
-
 const propTypes = {
   className: PropTypes.string,
-  events: PropTypes.arrayOf(eventShape).isRequired,
+  eventStore: PropTypes.object.isRequired,
   footerClassName: PropTypes.string,
   footerContentRenderer: PropTypes.func.isRequired,
   footerHeight: PropTypes.number,
@@ -34,6 +32,7 @@ const propTypes = {
   resources: PropTypes.arrayOf(resourceShape).isRequired,
   resourceVisible: PropTypes.bool,
   resourceColumnWidth: PropTypes.number, // width in %
+  resourceScheduleHash: PropTypes.func,
   rowClassName: PropTypes.string,
   rowContentRenderer: PropTypes.func.isRequired,
   rowResourceRenderer: PropTypes.func,
@@ -54,8 +53,9 @@ const defaultProps = {
   headerClassName: '',
   headerResourceRenderer: () => null,
   noResourcesRenderer: () => null,
-  resourceVisible: true,
   resourceColumnWidth: 12,
+  resourceScheduleHash: ({resource, index}) => index,
+  resourceVisible: true,
   rowClassName: '',
   rowResourceRenderer: defaultRowResourceRenderer,
   searchQuery: null,
@@ -94,7 +94,6 @@ class Scheduler extends Component {
     const {
       resources,
       noResourcesRenderer,
-      events,
       className,
       headerHeight,
       footerVisible,
@@ -102,18 +101,19 @@ class Scheduler extends Component {
       height,
       width,
       scrollToResource,
-      searchQuery
+      searchQuery,
+      resourceScheduleHash,
+      eventStore
     } = props
 
     const { searchMatches}  = this.state;
 
     const resourceById = keyBy(resources, 'id')
-    const eventsByResourceId = groupBy(events, 'resourceId')
 
     const cellRenderer = generateCellRenderer({
       resources,
       resourceById: resourceById,
-      eventById: keyBy(events, 'id'),
+      eventStore,
       rowRenderer: this.rowRenderer,
       searchMatches,
       searchQuery
@@ -132,23 +132,12 @@ class Scheduler extends Component {
         { this.getRenderedHeader() }
         <CellMeasurer
           cellRenderer={cellRenderer}
-          columnCount={COLUMN_COUNT}
+          columnCount={1}
           rowCount={resources.length}
           width={width}
           cellSizeCache={new KeyBasedCellSizeCache({
             buildRowKey: (index) => {
-                const id = resources[index].id;
-                const eventsByDates = groupBy(eventsByResourceId[id], (event) => (moment(event.start).format(LOCAL_DATE_FORMAT)))
-
-                return Object.keys(eventsByDates)
-                  .map((localDate) => {
-                      return eventsByDates[localDate].length
-                  })
-                .sort()
-                .filter(function(item, pos, ary) {
-                    return !pos || item != ary[pos - 1];
-                })
-                .join('|')
+                return resourceScheduleHash({resource: resources[index], eventStore, index});
             }
           })}
           ref={(ref) => {
@@ -162,7 +151,7 @@ class Scheduler extends Component {
               scrollingResetTimeInterval={300}
               width={width}
               height={bodyHeight}
-              columnCount={COLUMN_COUNT}
+              columnCount={1}
               columnWidth={width}
               overscanColumnCount={0}
               overscanRowCount={10}
@@ -291,7 +280,7 @@ class Scheduler extends Component {
     style,
     resource,
     resourceById,
-    eventById,
+    eventStore,
     isScrolling,
     isVisible,
     key,
@@ -310,17 +299,22 @@ class Scheduler extends Component {
       height: style.height
     }
 
+    const isEven = (index % 2 === 0)
+
     return (
-      <div key={key} style={{...style}} className={cn('hs-scheduler__row', rowClassName)}>
+      <div key={key} style={{...style}} className={cn('hs-scheduler__row', rowClassName, {
+        'hs-scheduler__row--odd': !isEven,
+        'hs-scheduler__row--even': isEven
+      })}>
         <FlexRow>
           {(resourceVisible)
             ? <FlexCell className="hs-scheduler__row__resource" width={resourceColumnWidth}>
-              { rowResourceRenderer({resource, searchQuery, searchMatches, style: sectionStyle}) }
+              { rowResourceRenderer({resource, eventStore, resourceById, searchQuery, searchMatches, style: sectionStyle}) }
             </FlexCell>
             : null
           }
           <FlexCell width={this.contentColumnWidth}>
-            { rowContentRenderer({resource, isScrolling, isVisible, style: sectionStyle}) }
+            { rowContentRenderer({resource, eventStore, resourceById, isScrolling, isVisible, style: sectionStyle}) }
           </FlexCell>
         </FlexRow>
       </div>

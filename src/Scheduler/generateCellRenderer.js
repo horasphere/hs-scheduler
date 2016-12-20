@@ -1,5 +1,5 @@
 
-export default function ({ resources, resourceById, eventById, rowRenderer, searchQuery, searchMatches }) {
+export default function ({ resources, resourceById, rowRenderer, eventStore, searchQuery, searchMatches }) {
   return function cellRenderer ({ rowIndex, style, isScrolling, isVisible, key }) {
 
     // CellMeasurer context style is undefined
@@ -14,7 +14,7 @@ export default function ({ resources, resourceById, eventById, rowRenderer, sear
       style,
       resource: resources[rowIndex],
       resourceById,
-      eventById,
+      eventStore,
       isScrolling,
       isVisible,
       key,
