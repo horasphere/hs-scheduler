@@ -9,6 +9,7 @@ import shallowCompare from 'react-addons-shallow-compare'
 import { Scheduler, resourceShape, eventShape } from './../Scheduler'
 import defaultHeaderDateRenderer from './defaultHeaderDateRenderer'
 import defaultRowDateRenderer from './defaultRowDateRenderer'
+import defaultFooterDateRenderer from './defaultFooterDateRenderer'
 import { FlexRow, FlexCell } from './../Flex'
 import { localDate } from './../utils/date'
 import WeekEventStore from './WeekEventStore'
@@ -22,13 +23,15 @@ const schedulerPropTypes = omit(Scheduler.propTypes, [
 
 const propTypes = {
   ...schedulerPropTypes,
-  events: PropTypes.arrayOf(eventShape).isRequired,
   dates: PropTypes.arrayOf(PropTypes.instanceOf(Date)).isRequired,
+  events: PropTypes.arrayOf(eventShape).isRequired,
+  footerDateRenderer: PropTypes.func.isRequired,
   headerDateRenderer: PropTypes.func.isRequired
 }
 
 const defaultProps = {
   ...Scheduler.defaultProps,
+  footerDateRenderer: defaultFooterDateRenderer,
   headerDateRenderer: defaultHeaderDateRenderer,
   rowDateRenderer: defaultRowDateRenderer
 }
@@ -107,13 +110,25 @@ class WeekScheduler extends Component {
       dates
       } = this.props;
 
+    const cellStyle = {
+      height: style.height
+    }
+
+    console.log('cellStyle', cellStyle)
+
     return (
       <FlexRow>
         {
           this.getLocalDates(dates).map((lDate, index) => {
             return (
               <FlexCell style={style} key={lDate} className="hs-scheduler--week__header__date" width={100 / dates.length}>
-                { headerDateRenderer({date: dates[index]}) }
+                {
+                  headerDateRenderer({
+                    date: dates[index],
+                    dateIndex: index,
+                    style: cellStyle
+                  })
+                }
               </FlexCell>
             )
           })
@@ -134,9 +149,25 @@ class WeekScheduler extends Component {
           this.getLocalDates(dates).map((lDate, index) => {
             const filteredEvents = eventStore.selectEventsByResourceAndDate(resource.id, lDate)
 
+            const cellStyle = {
+              height: style.height
+            }
+
             return (
               <FlexCell style={style} key={lDate} className="hs-scheduler--week__row__date" width={100 / dates.length}>
-                { rowDateRenderer({resource, date: dates[index], isScrolling, isVisible, events: filteredEvents, searchQuery, searchMatches})  }
+                {
+                  rowDateRenderer({
+                    resource,
+                    date: dates[index],
+                    dateIndex: index,
+                    isScrolling,
+                    isVisible,
+                    events: filteredEvents,
+                    searchQuery,
+                    searchMatches,
+                    style: cellStyle
+                  })
+                }
               </FlexCell>
             )
           })
@@ -144,18 +175,23 @@ class WeekScheduler extends Component {
       </FlexRow>
     )
   }
-  footerContentRenderer() {
+  footerContentRenderer({style}) {
     const {
-      dates
+      dates,
+      footerDateRenderer
       } = this.props;
+
+    const cellStyle = {
+      height: style.height
+    }
 
     return (
       <FlexRow>
         {
-          this.getLocalDates(dates).map((lDate) => {
+          this.getLocalDates(dates).map((lDate, index) => {
             return (
-              <FlexCell key={lDate} className="hs-scheduler--week__footer__date" width={100 / dates.length}>
-                { lDate }
+              <FlexCell key={lDate} style={style} className="hs-scheduler--week__footer__date" width={100 / dates.length}>
+                 { footerDateRenderer({date: dates[index], dateIndex: index, style: cellStyle}) }
               </FlexCell>
             )
           })

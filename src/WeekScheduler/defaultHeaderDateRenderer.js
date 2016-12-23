@@ -1,7 +1,15 @@
 import React from 'react'
 import moment from 'moment'
 
-export default function({ date }) {
+export default function({ date, style }) {
 
-  return moment(date).format('ddd D MMM').toUpperCase();
+  const cellStyle = {
+    ...style,
+    lineHeight: style.height,
+    width: '100%',
+    textAlign: 'center',
+    fontWeight: 'bold'
+  }
+
+  return <div style={cellStyle}>{ moment(date).format('ddd D MMM').toUpperCase() }</div>
 }

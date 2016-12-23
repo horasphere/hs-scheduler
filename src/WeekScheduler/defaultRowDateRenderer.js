@@ -3,9 +3,10 @@ import moment from 'moment'
 
 
 export default function({ resource, date, events, isScrolling, isVisible }) {
-  if(isScrolling) {
+  let child = null;
 
-    return <div style={{position: 'relative'}}>
+  if(isScrolling) {
+    child = (<div style={{position: 'relative'}}>
       {
         events.map((event, index) => {
           //return <Quart key={event.id} start={event.start} end={event.end} />
@@ -32,9 +33,11 @@ export default function({ resource, date, events, isScrolling, isVisible }) {
           </div>
         })
       }
-    </div>
+    </div>)
   }
-  return events.map((event) => {
-    return <div style={{margin: 5, width: 'calc(100% - 10px)', backgroundColor: '#dcdcdc'}} key={event.id}>{ moment(event.start).format('HH:mm') } - { moment(event.end).format('HH:mm') }</div>
-  })
+  else {
+    return events.map((event) => {
+      return <div style={{margin: 5, width: 'calc(100% - 10px)', backgroundColor: '#dcdcdc'}} key={event.id}>{ moment(event.start).format('HH:mm') } - { moment(event.end).format('HH:mm') }</div>
+    })
+  }
 }

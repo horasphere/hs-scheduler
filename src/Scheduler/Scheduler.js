@@ -47,7 +47,7 @@ const defaultProps = {
   className: '',
   footerClassName: '',
   footerHeight: 30,
-  footerVisible: true,
+  footerVisible: false,
   footerResourceRenderer: () => null,
   headerHeight: 30,
   headerClassName: '',
@@ -236,7 +236,7 @@ class Scheduler extends Component {
       } = this.props
 
     const style = {
-      height: headerHeight
+      height: headerHeight + 'px'
     }
 
     return (<FlexRow style={{height: headerHeight, paddingRight: 17}} className={cn('hs-scheduler__header', headerClassName)}>
@@ -262,7 +262,11 @@ class Scheduler extends Component {
       resourceVisible
       } = this.props
 
-    return (<FlexRow style={{height: footerHeight}} className={cn('hs-scheduler__footer', footerClassName)}>
+    const style = {
+      height: footerHeight + 'px'
+    }
+
+    return (<FlexRow style={{height: footerHeight, paddingRight: 17}} className={cn('hs-scheduler__footer', footerClassName)}>
       {(resourceVisible)
           ? <FlexCell className="hs-scheduler__footer__resource" width={resourceColumnWidth}>
             { footerResourceRenderer() }
@@ -270,7 +274,7 @@ class Scheduler extends Component {
           : null
         }
       <FlexCell width={this.contentColumnWidth}>
-        { footerContentRenderer() }
+        { footerContentRenderer({style}) }
       </FlexCell>
     </FlexRow>
     )
