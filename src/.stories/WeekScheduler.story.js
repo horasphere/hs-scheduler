@@ -44,7 +44,6 @@ class Search extends Component {
         e.preventDefault()
         this.props.next(this.state.searchQuery);
       }
-      console.log(e.keyCode)
     }
     componentWillMount() {
       document.addEventListener("keydown", this._handleKeyPress);
@@ -99,7 +98,7 @@ function rowDateRenderer({ resource, date, events, isScrolling, isVisible }) {
             top: index * 55,
             left: 0,
             width: 'calc(100% - 10px)'
-          }} key={event.id}>
+          }}>
             <div className="placeholder-quart">
               <div className="animated-background">
                 <div className="mask h-separator-1"></div>

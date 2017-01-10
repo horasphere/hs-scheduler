@@ -10,6 +10,7 @@ import { Scheduler, resourceShape, eventShape } from './../Scheduler'
 import defaultHeaderDateRenderer from './defaultHeaderDateRenderer'
 import defaultRowDateRenderer from './defaultRowDateRenderer'
 import defaultFooterDateRenderer from './defaultFooterDateRenderer'
+import defaultTimelineBlockRenderer from './defaultTimelineBlockRenderer'
 import { FlexRow, FlexCell } from './../Flex'
 import { localDate } from './../utils/date'
 import WeekEventStore from './WeekEventStore'
@@ -25,15 +26,21 @@ const propTypes = {
   ...schedulerPropTypes,
   dates: PropTypes.arrayOf(PropTypes.instanceOf(Date)).isRequired,
   events: PropTypes.arrayOf(eventShape).isRequired,
-  footerDateRenderer: PropTypes.func.isRequired,
-  headerDateRenderer: PropTypes.func.isRequired
+  footerDateRenderer: PropTypes.func,
+  headerDateRenderer: PropTypes.func,
+  timelineHeight: PropTypes.number,
+  timelineVisible: PropTypes.bool,
+  timelineBlockRenderer: PropTypes.func
 }
 
 const defaultProps = {
   ...Scheduler.defaultProps,
   footerDateRenderer: defaultFooterDateRenderer,
   headerDateRenderer: defaultHeaderDateRenderer,
-  rowDateRenderer: defaultRowDateRenderer
+  rowDateRenderer: defaultRowDateRenderer,
+  timelineBlockRenderer: defaultTimelineBlockRenderer,
+  timelineHeight: 10,
+  timelineVisible: true
 }
 
 class WeekScheduler extends Component {
@@ -114,8 +121,6 @@ class WeekScheduler extends Component {
       height: style.height
     }
 
-    console.log('cellStyle', cellStyle)
-
     return (
       <FlexRow>
         {
@@ -137,24 +142,30 @@ class WeekScheduler extends Component {
     )
   }
   rowContentRenderer({resource, resourceById, eventStore, isScrolling, isVisible, searchQuery, searchMatches, style}) {
-
     const {
       rowDateRenderer,
-      dates
+      dates,
+      timelineHeight,
+      timelineVisible,
+      timelineBlockRenderer
       } = this.props;
 
-    return (
+    const cellHeight = (timelineVisible) ? style.height - timelineHeight : style.height;
+    const childs = [];
+
+    childs.push(
       <FlexRow>
         {
           this.getLocalDates(dates).map((lDate, index) => {
             const filteredEvents = eventStore.selectEventsByResourceAndDate(resource.id, lDate)
 
             const cellStyle = {
-              height: style.height
+              height: cellHeight
             }
 
+
             return (
-              <FlexCell style={style} key={lDate} className="hs-scheduler--week__row__date" width={100 / dates.length}>
+              <FlexCell style={{...style, height: cellHeight}} key={lDate} className="hs-scheduler--week__row__date" width={100 / dates.length}>
                 {
                   rowDateRenderer({
                     resource,
@@ -174,6 +185,50 @@ class WeekScheduler extends Component {
         }
       </FlexRow>
     )
+
+    if(timelineVisible) {
+      const filteredEvents = eventStore.selectEventsByResource(resource.id)
+      const min = moment(localDate(dates[0]))
+      const max = moment(localDate(dates[dates.length -1])).add('1', 'days')
+      const total = max.diff(min);
+
+      childs.push(
+        <FlexRow className="hs-scheduler--week__row__timeline" style={{height: timelineHeight}}>
+          <FlexCell width={100} style={{position: 'relative'}}>
+            {
+              filteredEvents.map((event) => {
+                const start = moment(event.start);
+                const end = moment(event.end);
+
+                let left = start.diff(min) / total * 100;
+                if(left < 0) {
+                  left = 0;
+                }
+
+                let right = end.diff(min) / total * 100;
+                if(right > 100) {
+                  right = 100;
+                }
+
+                return timelineBlockRenderer({
+                  resource,
+                  event,
+                  isScrolling,
+                  isVisible,
+                  style: {
+                    position: 'absolute',
+                    left: `${left}%`,
+                    right: `${100 - right}%`
+                  }
+                })
+              })
+            }
+          </FlexCell>
+        </FlexRow>
+      )
+    }
+
+    return childs;
   }
   footerContentRenderer({style}) {
     const {

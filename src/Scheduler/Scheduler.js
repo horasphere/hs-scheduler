@@ -208,6 +208,8 @@ class Scheduler extends Component {
     if(searchQuery !== null) {
       searchMatches = resources.filter((resource) => {
           return searchMethod({resource, searchQuery})
+      }).map((resource) => {
+          return resource.id;
       })
     }
 
