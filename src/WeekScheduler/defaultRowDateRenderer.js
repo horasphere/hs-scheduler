@@ -17,7 +17,7 @@ export default function({ resource, date, events, isScrolling, isVisible }) {
             top: index * 55,
             left: 0,
             width: 'calc(100% - 10px)'
-          }} key={event.id}>
+          }}>
             <div className="placeholder-quart">
               <div className="animated-background">
                 <div className="mask h-separator-1"></div>

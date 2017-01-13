@@ -1,19 +1,17 @@
 import React, { Component, PropTypes } from 'react'
 import { Grid as VirtualizedGrid, CellMeasurer } from 'react-virtualized'
+import withScrolling, { createVerticalStrength } from 'react-dnd-scrollzone'
 import keyBy from 'lodash/keyBy'
-import debounce from 'lodash/debounce';
-import groupBy from 'lodash/groupBy'
 import cn from 'classnames'
 import shallowCompare from 'react-addons-shallow-compare'
-import moment from 'moment'
+
 
 import defaultRowResourceRenderer from './defaultRowResourceRenderer'
 import { FlexRow, FlexCell } from './../Flex'
 import generateCellRenderer from './generateCellRenderer'
-import { eventShape, resourceShape } from './propTypes'
+import { resourceShape } from './propTypes'
 import defaultSearchMethod from './defaultSearchMethod'
 import KeyBasedCellSizeCache from './keyBasedCellSizeCache'
-import { LOCAL_DATE_FORMAT } from './../utils/date'
 
 const propTypes = {
   className: PropTypes.string,
@@ -39,6 +37,7 @@ const propTypes = {
   searchQuery: PropTypes.any,
   searchMethod: PropTypes.func,
   searchFinished: PropTypes.func,
+  slideRegionSize: PropTypes.number,
   scrollToResource: PropTypes.string,
   width: PropTypes.number.isRequired
 }
@@ -61,6 +60,7 @@ const defaultProps = {
   searchQuery: null,
   searchMethod: defaultSearchMethod,
   searchFinished: () => {},
+  slideRegionSize: 100,
   scrollToResource: undefined
 }
 
@@ -72,10 +72,15 @@ class Scheduler extends Component {
       searchMatches: []
     }
 
+    this.scrollZoneVirtualGrid = withScrolling(VirtualizedGrid);
+    this.vStrength = createVerticalStrength(props.slideRegionSize);
+
     this.rowRenderer = this.rowRenderer.bind(this)
     this.search = this.search.bind(this)
     this.findResourceIndex = this.findResourceIndex.bind(this)
-    this.resetMeasurementForResourceId = this.resetMeasurementForResourceId.bind(this)
+    this.resetMeasurementForResourceIds = this.resetMeasurementForResourceIds.bind(this)
+    this.resetAllMeasurements = this.resetAllMeasurements.bind(this)
+    this._resetMeasurementForRowIndexes = this._resetMeasurementForRowIndexes.bind(this)
   }
   componentWillMount() {
     this.search(this.props)
@@ -89,7 +94,6 @@ class Scheduler extends Component {
     return shallowCompare(this, nextProps, nextState)
   }
   render () {
-    console.log('Scheduler[render]')
     const props = this.props;
     const {
       resources,
@@ -127,6 +131,8 @@ class Scheduler extends Component {
       bodyHeight -= footerHeight
     }
 
+    const ScrollZoneVirtualGrid = this.scrollZoneVirtualGrid;
+
     return (
       <div className={cn('hs-scheduler', className)} style={{width: width}}>
         { this.getRenderedHeader() }
@@ -145,8 +151,11 @@ class Scheduler extends Component {
           }}
         >
           {({ getRowHeight }) => (
-            <VirtualizedGrid
+            <ScrollZoneVirtualGrid
               {...props}
+              horizontalStrength={ ()=>{} }
+              verticalStrength={this.vStrength}
+              speed={30}
               autoContainerWidth
               scrollingResetTimeInterval={300}
               width={width}
@@ -154,7 +163,7 @@ class Scheduler extends Component {
               columnCount={1}
               columnWidth={width}
               overscanColumnCount={0}
-              overscanRowCount={10}
+              overscanRowCount={0}
               rowHeight={getRowHeight}
               rowCount={resources.length}
               cellRenderer={cellRenderer}
@@ -162,7 +171,9 @@ class Scheduler extends Component {
               scrollToRow={scrollToRow}
               noContentRenderer={noResourcesRenderer}
               ref={(ref) => {
-                  this._virtualGrid = ref;
+                  if(ref) {
+                    this._virtualGrid = ref.wrappedInstance;
+                  }
               }}
             />
         )}
@@ -187,13 +198,32 @@ class Scheduler extends Component {
 
     return -1;
   }
-  resetMeasurementForResourceId(resourceId) {
-    const resourceIndex = this.findResourceIndex(resourceId);
+  resetMeasurementForResourceIds(resourceIds) {
+    const resourceIndexes = []
+    this.props.resources.forEach((resource, index) => {
+      if(resourceIds.indexOf(resource.id) > -1) {
+        resourceIndexes.push(index);
+      }
+    })
 
-    if(resourceIndex > -1) {
-      this._cellMeasurer.resetMeasurementForRow(resourceIndex)
-      this._virtualGrid.recomputeGridSize({columnIndex: 0, rowIndex: resourceIndex})
-    }
+    this._resetMeasurementForRowIndexes(resourceIndexes)
+  }
+  resetAllMeasurements() {
+    const resourceIndexes = []
+    this.props.resources.forEach((resource, index) => {
+      resourceIndexes.push(index);
+    })
+
+    this._resetMeasurementForRowIndexes(resourceIndexes)
+  }
+  _resetMeasurementForRowIndexes(rowIndexes) {
+    rowIndexes.forEach((rowIndex) => {
+      this._cellMeasurer.resetMeasurementForRow(rowIndex)
+      this._virtualGrid._rowSizeAndPositionManager.resetCell(rowIndex)
+    })
+
+    this._virtualGrid._cellCache = {}
+    this.forceUpdate()
   }
   search(props) {
     let searchMatches = [];

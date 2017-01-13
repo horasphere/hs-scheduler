@@ -80,15 +80,11 @@ class WeekScheduler extends Component {
 
             return Object.keys(eventsByDates)
               .map((localDate) => {
-                  //return eventsByDates[localDate].length
-
                   let nbAssignations = 0;
                   eventsByDates[localDate].forEach((event) => {
                       nbAssignations += event.assignedQuartDTO.quartDTO.assignationDTOs.length
                   })
 
-
-                  console.log('hash', `${eventsByDates[localDate].length}q${nbAssignations}a`)
                   return `${eventsByDates[localDate].length}q${nbAssignations}a`
               })
             .sort()
@@ -254,8 +250,11 @@ class WeekScheduler extends Component {
       </FlexRow>
     )
   }
-  resetMeasurementForResourceId(resourceId) {
-    this._scheduler.resetMeasurementForResourceId(resourceId)
+  resetMeasurementForResourceIds(resourceIds) {
+    this._scheduler.resetMeasurementForResourceIds(resourceIds)
+  }
+  resetAllMeasurements() {
+    this._scheduler.resetAllMeasurements()
   }
 }
 
