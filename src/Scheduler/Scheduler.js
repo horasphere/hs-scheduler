@@ -274,7 +274,7 @@ class Scheduler extends Component {
     return (<FlexRow style={{height: headerHeight, paddingRight: 17}} className={cn('hs-scheduler__header', headerClassName)}>
       {(resourceVisible)
             ? <FlexCell className="hs-scheduler__header__resource" width={resourceColumnWidth}>
-              { headerResourceRenderer() }
+              { headerResourceRenderer({style}) }
             </FlexCell>
             : null
         }
@@ -301,7 +301,7 @@ class Scheduler extends Component {
     return (<FlexRow style={{height: footerHeight, paddingRight: 17}} className={cn('hs-scheduler__footer', footerClassName)}>
       {(resourceVisible)
           ? <FlexCell className="hs-scheduler__footer__resource" width={resourceColumnWidth}>
-            { footerResourceRenderer() }
+            { footerResourceRenderer({style}) }
           </FlexCell>
           : null
         }

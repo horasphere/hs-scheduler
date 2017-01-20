@@ -24,9 +24,11 @@ const schedulerPropTypes = omit(Scheduler.propTypes, [
 
 const propTypes = {
   ...schedulerPropTypes,
+  dateResourceUniqueKey: PropTypes.func,
   dates: PropTypes.arrayOf(PropTypes.instanceOf(Date)).isRequired,
   events: PropTypes.arrayOf(eventShape).isRequired,
   footerDateRenderer: PropTypes.func,
+  headerDateFormatter: PropTypes.func,
   headerDateRenderer: PropTypes.func,
   timelineHeight: PropTypes.number,
   timelineVisible: PropTypes.bool,
@@ -35,12 +37,14 @@ const propTypes = {
 
 const defaultProps = {
   ...Scheduler.defaultProps,
+  dateResourceUniqueKey: ({date, events}) => (events.length),
   footerDateRenderer: defaultFooterDateRenderer,
+  headerDateFormatter: (date) => (moment(date).format('ddd D MMM').toUpperCase()),
   headerDateRenderer: defaultHeaderDateRenderer,
   rowDateRenderer: defaultRowDateRenderer,
   timelineBlockRenderer: defaultTimelineBlockRenderer,
   timelineHeight: 10,
-  timelineVisible: true
+  timelineVisible: true,
 }
 
 class WeekScheduler extends Component {
@@ -65,6 +69,7 @@ class WeekScheduler extends Component {
   render () {
     const {
       events,
+      dateResourceUniqueKey
       } = this.props;
 
     return (
@@ -80,12 +85,10 @@ class WeekScheduler extends Component {
 
             return Object.keys(eventsByDates)
               .map((localDate) => {
-                  let nbAssignations = 0;
-                  eventsByDates[localDate].forEach((event) => {
-                      nbAssignations += event.assignedQuartDTO.quartDTO.assignationDTOs.length
+                  return dateResourceUniqueKey({
+                    date: moment(localDate),
+                    events: eventsByDates[localDate]
                   })
-
-                  return `${eventsByDates[localDate].length}q${nbAssignations}a`
               })
             .sort()
             .filter(function(item, pos, ary) {
@@ -109,6 +112,7 @@ class WeekScheduler extends Component {
   }
   headerContentRenderer({style}) {
     const {
+      headerDateFormatter,
       headerDateRenderer,
       dates
       } = this.props;
@@ -126,6 +130,7 @@ class WeekScheduler extends Component {
                 {
                   headerDateRenderer({
                     date: dates[index],
+                    headerDateFormatter,
                     dateIndex: index,
                     style: cellStyle
                   })
