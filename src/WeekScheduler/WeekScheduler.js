@@ -151,11 +151,15 @@ class WeekScheduler extends Component {
       timelineBlockRenderer
       } = this.props;
 
-    const cellHeight = (timelineVisible) ? style.height - timelineHeight : style.height;
+    let cellHeight = (timelineVisible) ? style.height - timelineHeight : style.height;
+    if(isNaN(cellHeight)) {
+      cellHeight = 'auto';
+    }
+
     const childs = [];
 
     childs.push(
-      <FlexRow>
+      <FlexRow key="schedule-row">
         {
           this.getLocalDates(dates).map((lDate, index) => {
             const filteredEvents = eventStore.selectEventsByResourceAndDate(resource.id, lDate)
@@ -163,7 +167,6 @@ class WeekScheduler extends Component {
             const cellStyle = {
               height: cellHeight
             }
-
 
             return (
               <FlexCell style={{...style, height: cellHeight}} key={lDate} className="hs-scheduler--week__row__date" width={100 / dates.length}>
@@ -194,7 +197,7 @@ class WeekScheduler extends Component {
       const total = max.diff(min);
 
       childs.push(
-        <FlexRow className="hs-scheduler--week__row__timeline" style={{height: timelineHeight}}>
+        <FlexRow key="timeline-row" className="hs-scheduler--week__row__timeline" style={{height: timelineHeight}}>
           <FlexCell width={100} style={{position: 'relative'}}>
             {
               filteredEvents.map((event) => {
@@ -214,6 +217,7 @@ class WeekScheduler extends Component {
                 return timelineBlockRenderer({
                   resource,
                   event,
+                  key: event.id,
                   isScrolling,
                   isVisible,
                   style: {

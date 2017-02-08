@@ -159,6 +159,7 @@ class Scheduler extends Component {
               autoContainerWidth
               scrollingResetTimeInterval={300}
               width={width}
+              estimatedRowSize={40}
               height={bodyHeight}
               columnCount={1}
               columnWidth={width}
