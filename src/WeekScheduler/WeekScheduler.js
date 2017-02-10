@@ -9,6 +9,8 @@ import shallowCompare from 'react-addons-shallow-compare'
 import { Scheduler, resourceShape, eventShape } from './../Scheduler'
 import defaultHeaderDateRenderer from './defaultHeaderDateRenderer'
 import defaultRowDateRenderer from './defaultRowDateRenderer'
+import defaultFooterDateRenderer from './defaultFooterDateRenderer'
+import defaultTimelineBlockRenderer from './defaultTimelineBlockRenderer'
 import { FlexRow, FlexCell } from './../Flex'
 import { localDate } from './../utils/date'
 import WeekEventStore from './WeekEventStore'
@@ -22,15 +24,27 @@ const schedulerPropTypes = omit(Scheduler.propTypes, [
 
 const propTypes = {
   ...schedulerPropTypes,
-  events: PropTypes.arrayOf(eventShape).isRequired,
+  dateResourceUniqueKey: PropTypes.func,
   dates: PropTypes.arrayOf(PropTypes.instanceOf(Date)).isRequired,
-  headerDateRenderer: PropTypes.func.isRequired
+  events: PropTypes.arrayOf(eventShape).isRequired,
+  footerDateRenderer: PropTypes.func,
+  headerDateFormatter: PropTypes.func,
+  headerDateRenderer: PropTypes.func,
+  timelineHeight: PropTypes.number,
+  timelineVisible: PropTypes.bool,
+  timelineBlockRenderer: PropTypes.func
 }
 
 const defaultProps = {
   ...Scheduler.defaultProps,
+  dateResourceUniqueKey: ({date, events}) => (events.length),
+  footerDateRenderer: defaultFooterDateRenderer,
+  headerDateFormatter: (date) => (moment(date).format('ddd D MMM').toUpperCase()),
   headerDateRenderer: defaultHeaderDateRenderer,
-  rowDateRenderer: defaultRowDateRenderer
+  rowDateRenderer: defaultRowDateRenderer,
+  timelineBlockRenderer: defaultTimelineBlockRenderer,
+  timelineHeight: 10,
+  timelineVisible: true,
 }
 
 class WeekScheduler extends Component {
@@ -55,6 +69,7 @@ class WeekScheduler extends Component {
   render () {
     const {
       events,
+      dateResourceUniqueKey
       } = this.props;
 
     return (
@@ -70,16 +85,10 @@ class WeekScheduler extends Component {
 
             return Object.keys(eventsByDates)
               .map((localDate) => {
-                  //return eventsByDates[localDate].length
-
-                  let nbAssignations = 0;
-                  eventsByDates[localDate].forEach((event) => {
-                      nbAssignations += event.assignedQuartDTO.quartDTO.assignationDTOs.length
+                  return dateResourceUniqueKey({
+                    date: moment(localDate),
+                    events: eventsByDates[localDate]
                   })
-
-
-                  console.log('hash', `${eventsByDates[localDate].length}q${nbAssignations}a`)
-                  return `${eventsByDates[localDate].length}q${nbAssignations}a`
               })
             .sort()
             .filter(function(item, pos, ary) {
@@ -103,9 +112,14 @@ class WeekScheduler extends Component {
   }
   headerContentRenderer({style}) {
     const {
+      headerDateFormatter,
       headerDateRenderer,
       dates
       } = this.props;
+
+    const cellStyle = {
+      height: style.height
+    }
 
     return (
       <FlexRow>
@@ -113,7 +127,14 @@ class WeekScheduler extends Component {
           this.getLocalDates(dates).map((lDate, index) => {
             return (
               <FlexCell style={style} key={lDate} className="hs-scheduler--week__header__date" width={100 / dates.length}>
-                { headerDateRenderer({date: dates[index]}) }
+                {
+                  headerDateRenderer({
+                    date: dates[index],
+                    headerDateFormatter,
+                    dateIndex: index,
+                    style: cellStyle
+                  })
+                }
               </FlexCell>
             )
           })
@@ -122,21 +143,115 @@ class WeekScheduler extends Component {
     )
   }
   rowContentRenderer({resource, resourceById, eventStore, isScrolling, isVisible, searchQuery, searchMatches, style}) {
-
     const {
       rowDateRenderer,
-      dates
+      dates,
+      timelineHeight,
+      timelineVisible,
+      timelineBlockRenderer
       } = this.props;
+
+    let cellHeight = (timelineVisible) ? style.height - timelineHeight : style.height;
+    if(isNaN(cellHeight)) {
+      cellHeight = 'auto';
+    }
+
+    const childs = [];
+
+    childs.push(
+      <FlexRow key="schedule-row">
+        {
+          this.getLocalDates(dates).map((lDate, index) => {
+            const filteredEvents = eventStore.selectEventsByResourceAndDate(resource.id, lDate)
+
+            const cellStyle = {
+              height: cellHeight
+            }
+
+            return (
+              <FlexCell style={{...style, height: cellHeight}} key={lDate} className="hs-scheduler--week__row__date" width={100 / dates.length}>
+                {
+                  rowDateRenderer({
+                    resource,
+                    date: dates[index],
+                    dateIndex: index,
+                    isScrolling,
+                    isVisible,
+                    events: filteredEvents,
+                    searchQuery,
+                    searchMatches,
+                    style: cellStyle
+                  })
+                }
+              </FlexCell>
+            )
+          })
+        }
+      </FlexRow>
+    )
+
+    if(timelineVisible) {
+      const filteredEvents = eventStore.selectEventsByResource(resource.id)
+      const min = moment(localDate(dates[0]))
+      const max = moment(localDate(dates[dates.length -1])).add('1', 'days')
+      const total = max.diff(min);
+
+      childs.push(
+        <FlexRow key="timeline-row" className="hs-scheduler--week__row__timeline" style={{height: timelineHeight}}>
+          <FlexCell width={100} style={{position: 'relative'}}>
+            {
+              filteredEvents.map((event) => {
+                const start = moment(event.start);
+                const end = moment(event.end);
+
+                let left = start.diff(min) / total * 100;
+                if(left < 0) {
+                  left = 0;
+                }
+
+                let right = end.diff(min) / total * 100;
+                if(right > 100) {
+                  right = 100;
+                }
+
+                return timelineBlockRenderer({
+                  resource,
+                  event,
+                  key: event.id,
+                  isScrolling,
+                  isVisible,
+                  style: {
+                    position: 'absolute',
+                    left: `${left}%`,
+                    right: `${100 - right}%`
+                  }
+                })
+              })
+            }
+          </FlexCell>
+        </FlexRow>
+      )
+    }
+
+    return childs;
+  }
+  footerContentRenderer({style}) {
+    const {
+      dates,
+      footerDateRenderer
+      } = this.props;
+
+    const cellStyle = {
+      height: style.height
+    }
 
     return (
       <FlexRow>
         {
           this.getLocalDates(dates).map((lDate, index) => {
-            const filteredEvents = eventStore.selectEventsByResourceAndDate(resource.id, lDate)
-
             return (
-              <FlexCell style={style} key={lDate} className="hs-scheduler--week__row__date" width={100 / dates.length}>
-                { rowDateRenderer({resource, date: dates[index], isScrolling, isVisible, events: filteredEvents, searchQuery, searchMatches})  }
+              <FlexCell key={lDate} style={style} className="hs-scheduler--week__footer__date" width={100 / dates.length}>
+                 { footerDateRenderer({date: dates[index], dateIndex: index, style: cellStyle}) }
               </FlexCell>
             )
           })
@@ -144,27 +259,11 @@ class WeekScheduler extends Component {
       </FlexRow>
     )
   }
-  footerContentRenderer() {
-    const {
-      dates
-      } = this.props;
-
-    return (
-      <FlexRow>
-        {
-          this.getLocalDates(dates).map((lDate) => {
-            return (
-              <FlexCell key={lDate} className="hs-scheduler--week__footer__date" width={100 / dates.length}>
-                { lDate }
-              </FlexCell>
-            )
-          })
-        }
-      </FlexRow>
-    )
+  resetMeasurementForResourceIds(resourceIds) {
+    this._scheduler.resetMeasurementForResourceIds(resourceIds)
   }
-  resetMeasurementForResourceId(resourceId) {
-    this._scheduler.resetMeasurementForResourceId(resourceId)
+  resetAllMeasurements() {
+    this._scheduler.resetAllMeasurements()
   }
 }
 

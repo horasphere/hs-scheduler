@@ -101,15 +101,27 @@
 }
 
 .hs-scheduler--week__header__date,
-.hs-scheduler--week__row__date {
+.hs-scheduler--week__row__date,
+.hs-scheduler--week__footer__date {
   border-left: 1px solid #DDD;
-  padding: 6px;
-  position: relative;
 }
 
+.hs-scheduler--week__row__timeline {
+  position: relative;
+  border-left:1px solid #DDD;
+  border-top: 1px solid #DDD;
+}
 
-// TODO move to Hora
+// TODO move to Hora?
 .ReactVirtualized__Grid:focus,
 .ReactVirtualized__Grid__innerScrollContainer:focus {
   outline: none;
+}
+
+.hs-scheduler__row--even {
+  background-color: #fff
+}
+
+.hs-scheduler__row--odd {
+  background-color: #f0f7ea
 }
