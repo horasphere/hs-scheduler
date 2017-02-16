@@ -224,6 +224,7 @@ class Scheduler extends Component {
     })
 
     this._virtualGrid._cellCache = {}
+    this._virtualGrid.recomputeGridSize()
     this.forceUpdate()
   }
   search(props) {
