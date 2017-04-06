@@ -7,11 +7,10 @@ import DateHeader from './DateHeader'
 import {resourceShape, weekComponentsShape} from './propTypes'
 
 const propTypes = {
-  date: PropTypes.instanceOf(Date).isRequired,
   resources: PropTypes.arrayOf(resourceShape).isRequired,
   view: PropTypes.oneOf(['week']).isRequired,
   weekdayFormat: PropTypes.string.isRequired,
-  startOfWeek: PropTypes.oneOf([0, 1, 2, 3, 5, 6]).isRequired, // (Sunday to Saturday)
+  dates: PropTypes.arrayOf(Date).isRequired,
   showResourcesColumn: PropTypes.bool.isRequired,
   isLoading: PropTypes.bool.isRequired,
   loading: PropTypes.element.isRequired,
@@ -22,10 +21,8 @@ const propTypes = {
 }
 
 const defaultProps = {
-  date: new Date(),
   view: 'week',
   weekdayFormat: 'ddd D MMM',
-  startOfWeek: 0,
   showResourcesColumn: true,
   isLoading: false,
   loading: <div style={{textAlign: 'center'}}>Loading...</div>,
@@ -50,8 +47,7 @@ class Scheduler extends Component {
   renderWeekView () {
     return (
       <WeekView
-        date={this.props.date}
-        startOfWeek={this.props.startOfWeek}
+        dates={this.props.dates}
         weekdayFormat={this.props.weekdayFormat}
         resources={this.props.resources}
         isLoading={this.props.isLoading}

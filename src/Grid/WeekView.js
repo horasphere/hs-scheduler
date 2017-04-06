@@ -2,17 +2,13 @@ import React, {Component, PropTypes} from 'react'
 import moment from 'moment'
 
 import { resourceShape, weekComponentsShape } from './propTypes'
-import {LOCAL_DATE_FORMAT} from './../utils/date'
 import { indexResources } from './../utils/resourceHelper'
 import WeekBodyRow from './WeekBodyRow'
 
-const NB_OF_DAYS = 7
-
 const propTypes = {
-  date: PropTypes.instanceOf(Date).isRequired,
+  dates: PropTypes.arrayOf(Date).isRequired,
   resources: PropTypes.arrayOf(resourceShape).isRequired,
   weekdayFormat: PropTypes.string.isRequired,
-  startOfWeek: PropTypes.oneOf([0, 1, 2, 3, 5, 6]).isRequired,
   showResourcesColumn: PropTypes.bool.isRequired,
   isLoading: PropTypes.bool.isRequired,
   loading: PropTypes.element.isRequired,
@@ -21,27 +17,6 @@ const propTypes = {
 }
 
 class Week extends Component {
-  get start () {
-    const {date, startOfWeek} = this.props
-
-    const start = moment(date).day(startOfWeek).format(LOCAL_DATE_FORMAT)
-
-    if (moment(start).isAfter(moment(date).format(LOCAL_DATE_FORMAT))) {
-      return moment(start).add(-1 * NB_OF_DAYS, 'days')
-    }
-
-    return moment(start).toDate()
-  }
-  get dates () {
-    const start = this.start
-    const dates = [start]
-
-    for (var i = 1; i < NB_OF_DAYS; i++) {
-      dates.push(moment(start).add(i, 'days').toDate())
-    }
-
-    return dates
-  }
   renderHeader (dates) {
     const showResourcesColumn = this.props.showResourcesColumn
     const HeaderTitle = this.props.components.headerTitle
@@ -118,7 +93,7 @@ class Week extends Component {
     return this.renderBodyRows(dates, indexedResources)
   }
   render () {
-    const dates = this.dates
+    const dates = this.props.dates;
     const indexedResources = indexResources(this.props.resources)
 
     return (
