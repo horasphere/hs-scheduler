@@ -6,6 +6,8 @@ import random from 'lodash/random';
 import moment from 'moment';
 import names from './names';
 import Grid from './../Grid';
+import determineDates from './../utils/determine-dates';
+
 import './../Grid/scheduler.less';
 
 const dates = [
@@ -120,9 +122,12 @@ class WeekView extends Component {
                     <Grid
                         resources={this.state.resources}
                         showResourcesColumn={this.state.showResourcesColumn}
-                        startOfWeek={0}
                         isLoading={this.state.isLoading}
-                        date={new Date(2016, 10, 6)}
+                        dates={determineDates({
+                          date: new Date(2016, 10, 6),
+                          startOfWeek: 0,
+                          nbOfDays: 7
+                        })}
                         />
                 </div>
             </div>

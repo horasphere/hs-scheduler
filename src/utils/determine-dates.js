@@ -1,3 +1,5 @@
+import moment from 'moment'
+
 import {LOCAL_DATE_FORMAT} from './date'
 
 const NB_OF_DAYS = 7
@@ -35,9 +37,8 @@ function dates({date = new Date(), startOfWeek = 0, nbOfDays = NB_OF_DAYS}) {
     startOfWeek: startOfWeek
   })
 
-  return {
-    dates: determineDates(start, nbOfDays)
-  }
+
+  return determineDates(start, nbOfDays)
 }
 
 export default dates;
