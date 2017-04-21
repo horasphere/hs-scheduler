@@ -21,10 +21,3 @@ export const resourceShape = shape({
   name: string.isRequired,
   assignments: arrayOf(assignmentShape).isRequired
 })
-
-export const weekComponentsShape = shape({
-  headerTitle: elementType.isRequired,
-  headerWeekday: elementType.isRequired,
-  assignment: elementType.isRequired,
-  resource: elementType.isRequired
-})

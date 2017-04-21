@@ -1,5 +1,6 @@
 import React, {Component, PropTypes} from 'react'
 import moment from 'moment'
+import elementType from 'react-prop-types/lib/elementType'
 
 import { resourceShape, weekComponentsShape } from './propTypes'
 import { indexResources } from './../utils/resourceHelper'
@@ -13,7 +14,12 @@ const propTypes = {
   isLoading: PropTypes.bool.isRequired,
   loading: PropTypes.element.isRequired,
   empty: PropTypes.element.isRequired,
-  components: weekComponentsShape
+  components: PropTypes.shape({
+    headerTitle: elementType.isRequired,
+    headerWeekday: elementType.isRequired,
+    assignment: elementType.isRequired,
+    resource: elementType.isRequired
+  })
 }
 
 class Week extends Component {

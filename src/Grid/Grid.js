@@ -1,8 +1,9 @@
 import React, {Component, PropTypes} from 'react'
-import WeekView from './WeekView'
+import elementType from 'react-prop-types/lib/elementType'
 import moment from 'moment'
 import extend from 'lodash/extend'
 
+import WeekView from './WeekView'
 import DateHeader from './DateHeader'
 import {resourceShape, weekComponentsShape} from './propTypes'
 
@@ -16,7 +17,12 @@ const propTypes = {
   loading: PropTypes.element.isRequired,
   empty: PropTypes.element.isRequired,
   components: PropTypes.shape({
-    week: weekComponentsShape
+    week: PropTypes.shape({
+      headerTitle: elementType,
+      headerWeekday: elementType,
+      assignment: elementType,
+      resource: elementType
+    })
   })
 }
 
