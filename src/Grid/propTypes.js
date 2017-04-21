@@ -25,5 +25,6 @@ export const resourceShape = shape({
 export const weekComponentsShape = shape({
   headerTitle: elementType.isRequired,
   headerWeekday: elementType.isRequired,
-  assignment: elementType.isRequired
+  assignment: elementType.isRequired,
+  resource: elementType.isRequired
 })

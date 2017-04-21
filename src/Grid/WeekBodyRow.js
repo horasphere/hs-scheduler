@@ -16,9 +16,11 @@ const propTypes = {
 
 class WeekBodyRow extends Component {
   renderTitleColumn () {
-    const {resource} = this.props
+    const {resource, resourceComponent: Resource} = this.props
 
-    return <div className='hs-scheduler__body__row__title'>{resource.name}</div>
+    return <div className='hs-scheduler__body__row__title'>
+      <Resource resource={resource} />
+    </div>
   }
   renderWeekdayColumn (date) {
     const {indexedResources, resource, assignmentComponent} = this.props

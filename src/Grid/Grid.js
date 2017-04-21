@@ -38,6 +38,9 @@ const defaultProps = {
       assignment: function (props) {
         const {start, end} = props.assignment
         return <div>{moment(start).format('HH:mm')} - {moment(end).format('HH:mm')}</div>
+      },
+      resource: function(props) {
+        return <span>{props.resource.name}</span>
       }
     }
   }

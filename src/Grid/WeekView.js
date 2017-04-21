@@ -45,6 +45,7 @@ class Week extends Component {
   renderBodyRows (dates, indexedResources) {
     const {showResourcesColumn} = this.props
     const Assignment = this.props.components.assignment
+    const Resource = this.props.components.resource
 
     return (
       <div className='hs-scheduler__body'>
@@ -53,6 +54,7 @@ class Week extends Component {
             key={resource.id}
             dates={dates}
             resource={resource}
+            resourceComponent={Resource}
             indexedResources={indexedResources}
             showResourcesColumn={showResourcesColumn}
             assignmentComponent={Assignment}

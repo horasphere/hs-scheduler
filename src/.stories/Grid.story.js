@@ -10,6 +10,11 @@ import determineDates from './../utils/determine-dates';
 
 import './../Grid/scheduler.less';
 
+
+function CustomResource(props) {
+  return <span style={{textDecoration: 'underline'}}>{props.resource.name}</span>
+}
+
 const dates = [
     '06',
     '07',
@@ -128,6 +133,11 @@ class WeekView extends Component {
                           startOfWeek: 0,
                           nbOfDays: 7
                         })}
+                        components={{
+                          week: {
+                            resource: CustomResource,
+                          }
+                        }}
                         />
                 </div>
             </div>
