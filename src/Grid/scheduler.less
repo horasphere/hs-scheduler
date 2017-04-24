@@ -62,6 +62,9 @@
     height: calc(~"100% - @{header-height}");
     overflow-y: scroll;
 
+    &-without-header {
+      height: 100%;
+    }
   }
 
   &__body__row {
@@ -70,6 +73,7 @@
     &__title,
     &__date {
       .cell-display(top);
+      position: relative;
     }
 
     &__title {
