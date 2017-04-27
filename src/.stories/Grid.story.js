@@ -128,6 +128,9 @@ class WeekView extends Component {
                         resources={this.state.resources}
                         showResourcesColumn={this.state.showResourcesColumn}
                         isLoading={this.state.isLoading}
+                        rowClassName={({index}) => {
+                            return (index % 2 === 0) ? 'even' : 'odd';
+                        }}
                         dates={determineDates({
                           date: new Date(2016, 10, 6),
                           startOfWeek: 0,

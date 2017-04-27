@@ -15,6 +15,7 @@ const propTypes = {
   isLoading: PropTypes.bool.isRequired,
   loading: PropTypes.element.isRequired,
   empty: PropTypes.element.isRequired,
+  rowClassName: PropTypes.func.isRequired,
   components: PropTypes.shape({
     headerTitle: elementType.isRequired,
     headerWeekday: elementType.isRequired,
@@ -50,24 +51,33 @@ class Week extends Component {
     )
   }
   renderBodyRows (dates, indexedResources) {
-    const {showResourcesColumn, showHeader} = this.props
-    const Assignment = this.props.components.assignment
-    const Resource = this.props.components.resource
+    const {
+      rowClassName,
+      showResourcesColumn,
+      showHeader
+    } = this.props
+
+    const {
+      assignment: Assignment,
+      resource: Resource
+    } = this.props.components
 
     const className = (showHeader) ? 'hs-scheduler__body' : 'hs-scheduler__body hs-scheduler__body-without-header';
 
     return (
       <div className={className}>
-        {this.props.resources.map((resource) => {
+        {this.props.resources.map((resource, index) => {
           return <WeekBodyRow
             key={resource.id}
             dates={dates}
+            index={index}
             resource={resource}
             resourceComponent={Resource}
             indexedResources={indexedResources}
             showResourcesColumn={showResourcesColumn}
             assignmentComponent={Assignment}
-                        />
+            rowClassName={rowClassName}
+            />
         })}
       </div>
     )

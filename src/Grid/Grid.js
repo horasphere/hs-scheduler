@@ -17,6 +17,7 @@ const propTypes = {
   isLoading: PropTypes.bool,
   loading: PropTypes.element,
   empty: PropTypes.element,
+  rowClassName: PropTypes.func,
   components: PropTypes.shape({
     week: PropTypes.shape({
       headerTitle: elementType,
@@ -35,6 +36,7 @@ const defaultProps = {
   isLoading: false,
   loading: <div style={{textAlign: 'center'}}>Loading...</div>,
   empty: <div style={{textAlign: 'center'}}>No resources to display</div>,
+  rowClassName: ({resource, dates}) => (''),
   components: {
     week: {
       headerTitle: function (props) {
@@ -66,6 +68,7 @@ class Scheduler extends Component {
         showHeader={this.props.showHeader}
         loading={this.props.loading}
         empty={this.props.empty}
+        rowClassName={this.props.rowClassName}
         components={extend({}, defaultProps.components.week, this.props.components.week)}
             />
     )

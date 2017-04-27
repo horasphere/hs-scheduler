@@ -9,9 +9,11 @@ import {LOCAL_DATE_FORMAT} from './../utils/date'
 const propTypes = {
   dates: PropTypes.arrayOf(PropTypes.instanceOf(Date)).isRequired,
   resource: resourceShape.isRequired,
+  index: PropTypes.number.isRequired,
   indexedResources: PropTypes.object.isRequired,
   showResourcesColumn: PropTypes.bool.isRequired,
-  assignmentComponent: elementType.isRequired
+  assignmentComponent: elementType.isRequired,
+  rowClassName: PropTypes.func.isRequired
 }
 
 class WeekBodyRow extends Component {
@@ -41,11 +43,20 @@ class WeekBodyRow extends Component {
     )
   }
   render () {
-    const {resource, dates, showResourcesColumn} = this.props
+    const {
+      index,
+      resource,
+      dates,
+      showResourcesColumn,
+      rowClassName
+    } = this.props
+
     const {id: resourceId} = resource
 
+    const className = 'hs-scheduler__body__row ' + rowClassName({index, resource, dates})
+
     return (
-      <div className='hs-scheduler__body__row' key={resourceId}>
+      <div className={className} key={resourceId}>
         {(showResourcesColumn)
                     ? this.renderTitleColumn()
                     : null
