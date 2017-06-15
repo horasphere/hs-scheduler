@@ -27,6 +27,7 @@ const propTypes = {
   headerContentRenderer: PropTypes.func.isRequired,
   headerClassName: PropTypes.string,
   noResourcesRenderer: PropTypes.func,
+  overscanRowCount: PropTypes.number,
   resources: PropTypes.arrayOf(resourceShape).isRequired,
   resourceVisible: PropTypes.bool,
   resourceColumnWidth: PropTypes.number, // width in %
@@ -52,6 +53,7 @@ const defaultProps = {
   headerClassName: '',
   headerResourceRenderer: () => null,
   noResourcesRenderer: () => null,
+  overscanRowCount: 0,
   resourceColumnWidth: 12,
   resourceScheduleHash: ({resource, index}) => index,
   resourceVisible: true,
@@ -107,7 +109,8 @@ class Scheduler extends Component {
       scrollToResource,
       searchQuery,
       resourceScheduleHash,
-      eventStore
+      eventStore,
+      overscanRowCount
     } = props
 
     const { searchMatches}  = this.state;
@@ -164,7 +167,7 @@ class Scheduler extends Component {
               columnCount={1}
               columnWidth={width}
               overscanColumnCount={0}
-              overscanRowCount={0}
+              overscanRowCount={overscanRowCount}
               rowHeight={getRowHeight}
               rowCount={resources.length}
               cellRenderer={cellRenderer}

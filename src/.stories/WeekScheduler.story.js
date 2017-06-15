@@ -72,6 +72,10 @@ class Search extends Component {
                    this._input = ref;
                 }}
                 />
+              <input value={this.props.overscanRowCount} onChange={(evt) => {
+                  this.props.onOverscanRowCountChanged(parseInt(evt.target.value));
+              }}
+              />
               <button onClick={() => {previous(this.state.searchQuery)}}>&lt;</button>
               <button onClick={() => {next(this.state.searchQuery)}}>&gt;</button>
               <span>{(count === 0) ? 0 : index + 1 } / {count}</span>
@@ -145,7 +149,8 @@ class Wrapper extends Component {
       scrollToResource: undefined,
       dates,
       resources,
-      events: generateEvents(resources, dates)
+      events: generateEvents(resources, dates),
+      overscanRowCount: 10
     }
 
     this.handleAdd = this.handleAdd.bind(this);
@@ -229,6 +234,7 @@ class Wrapper extends Component {
           </div>
           <div>
             <Search
+                overscanRowCount={this.state.overscanRowCount}
                 index={this.state.searchFocusIndex}
                 count={this.state.searchFoundCount}
                 changed={debounce((searchQuery) => {
@@ -242,6 +248,11 @@ class Wrapper extends Component {
                       console.log('Changed', searchQuery)
 
                 }, 300)}
+                onOverscanRowCountChanged={(overscanRowCount) => {
+                  this.setState({
+                    overscanRowCount
+                  })
+                }}
                 previous={(searchQuery) => {
                     const {
                       searchFoundCount,
@@ -288,6 +299,7 @@ class Wrapper extends Component {
               height={400}
               scrollToResource={scrollToResource}
               searchQuery={searchQuery}
+              overscanRowCount={this.state.overscanRowCount}
               searchFinished={({matches, searchQuery}) => {
                   this.setState({
                     searchFoundCount: matches.length,
